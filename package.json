@@ -1,0 +1,22 @@
+{
+  "name": "ivory",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev:css": "npx @tailwindcss/cli -i ./assets/css/input.css -o ./assets/css/main.css --watch",
+    "dev:jekyll": "bundle exec jekyll serve --livereload",
+    "dev": "concurrently \"npm:dev:css\" \"npm:dev:jekyll\"",
+    "build:css": "npx @tailwindcss/cli -i ./assets/css/input.css -o ./assets/css/main.css --minify",
+    "build:jekyll": "bundle exec jekyll build",
+    "build": "npm run build:css && npm run build:jekyll"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "concurrently": "^10.0.4",
+    "tailwindcss": "^4.3.3"
+  }
+}

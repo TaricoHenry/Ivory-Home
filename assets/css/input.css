@@ -1,0 +1,141 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: Georgia, "Times New Roman", serif;
+  --font-body: Inter, ui-sans-serif, system-ui, sans-serif;
+
+  --color-cream: #f7f3ec;
+  --color-charcoal: #191817;
+  --color-gold: #c9a96e;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--color-cream);
+    color: var(--color-charcoal);
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer components {
+  /*
+   * The track contains two identical image sets.
+   * Moving it by half its width creates a continuous carousel.
+   */
+  .hero-carousel-track {
+    display: flex;
+    width: max-content;
+    height: 100%;
+    animation: hero-carousel 70s linear infinite;
+    will-change: transform;
+  }
+
+  .hero-carousel-set {
+    display: flex;
+    flex-shrink: 0;
+    height: 100%;
+  }
+
+  .hero-carousel-slide {
+    position: relative;
+    width: clamp(22rem, 42vw, 46rem);
+    height: 100%;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .hero-carousel-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(0.75);
+    transform: scale(1.04);
+  }
+
+  .event-card {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    min-height: 27rem;
+    flex-basis: 33%;
+    flex: 1 1 0%;
+    cursor: pointer;
+    overflow: hidden;
+    border-radius: 50px;
+    border: 1px solid rgb(255 255 255 / 18%);
+    text-align: left;
+    transition:
+      flex-grow 700ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 500ms ease,
+      box-shadow 500ms ease;
+  }
+
+  .event-card:hover,
+  .event-card[data-selected="true"] {
+    flex-grow: 1.7;
+    transform: translateY(-0.5rem);
+    box-shadow: 0 2rem 5rem rgb(25 24 23 / 18%);
+  }
+
+  .event-card-description {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(1rem);
+    transition:
+      max-height 500ms ease,
+      opacity 500ms ease,
+      transform 500ms ease;
+  }
+
+  .event-card:hover .event-card-description,
+  .event-card[data-selected="true"] .event-card-description {
+    max-height: 8rem;
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-carousel {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 767px) {
+  .event-card {
+    min-height: 18rem;
+    width: 100%;
+    border-radius: 3rem;
+  }
+
+  .event-card:hover,
+  .event-card[data-selected="true"] {
+    flex-grow: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-carousel-track {
+    animation: none;
+  }
+
+  .event-card,
+  .event-card-description {
+    transition: none;
+  }
+}

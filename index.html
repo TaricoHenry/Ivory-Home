@@ -1,0 +1,447 @@
+---
+layout: default
+title: Ivory Invitations
+description: Beautiful digital invitations for weddings, birthdays, conferences, concerts and special events.
+---
+
+<main>
+  <!-- =========================================================
+       SECTION 1: HERO AND BACKGROUND CAROUSEL
+       ========================================================= -->
+  <section
+    class="relative flex min-h-screen items-center justify-center overflow-hidden bg-charcoal"
+    aria-labelledby="hero-heading"
+  >
+    <div class="absolute inset-0" aria-hidden="true">
+      <div class="hero-carousel-track">
+        {% for copy in (1..2) %}
+          <div class="hero-carousel-set">
+            {% for image in site.data.hero_images %}
+              <figure class="hero-carousel-slide">
+                <img
+                  src="{{ image.src | relative_url }}"
+                  alt=""
+                  width="1200"
+                  height="900"
+                >
+              </figure>
+            {% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Improves contrast behind the centered logo. -->
+    <div
+      class="absolute inset-0 bg-black/45"
+      aria-hidden="true"
+    ></div>
+
+    <div
+      class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.65)_100%)]"
+      aria-hidden="true"
+    ></div>
+
+    <div class="relative z-10 mx-auto max-w-4xl px-6 text-center text-white">
+      <!-- Replace this text with an SVG or image logo later. -->
+      <a
+        href="#event-types"
+        class="inline-block rounded-full px-8 py-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-transparent"
+        aria-label="Explore our event invitation options"
+      >
+        <p class="mb-5 text-xs font-semibold uppercase tracking-[0.45em] text-white/75">
+          Digital Event Experiences
+        </p>
+
+        <img
+        id="hero-heading"
+        src="{{ '/assets/images/ivory-logo_white.svg' | relative_url }}"
+        alt="Ever After Events"
+        class="mx-auto h-auto w-100 sm:w-100 md:w-128 lg:w-[180rem]"
+        >
+      </a>
+
+      <p class="mx-auto mt-6 max-w-xl text-base leading-7 text-white/75 sm:text-lg">
+        Thoughtfully designed digital invitations for celebrations,
+        gatherings and unforgettable moments.
+      </p>
+
+      <a
+        href="#event-types"
+        class="mt-10 inline-flex items-center gap-3 rounded-full border border-white/35 bg-white/10 px-7 py-3 text-sm font-semibold backdrop-blur-md transition hover:border-white hover:bg-white hover:text-charcoal focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+      >
+        Explore occasions
+
+        <span aria-hidden="true">↓</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       SECTION 2: EVENT TYPE SELECTOR
+       ========================================================= -->
+  <section
+    id="event-types"
+    class="bg-cream px-5 py-24 sm:px-8 md:py-32"
+    aria-labelledby="event-types-heading"
+  >
+    <div class="mx-auto max-w-7xl">
+      <div class="mx-auto mb-14 max-w-2xl text-center">
+        <p class="mb-4 text-xs font-bold uppercase tracking-[0.35em] text-neutral-500">
+          Choose your occasion
+        </p>
+
+        <h2
+          id="event-types-heading"
+          class="font-display text-5xl leading-tight tracking-tight sm:text-6xl"
+        >
+          What are you celebrating?
+        </h2>
+
+        <p class="mx-auto mt-6 max-w-xl text-base leading-7 text-neutral-600">
+          Select an event type to begin imagining an invitation designed
+          around your story.
+        </p>
+      </div>
+
+      <div
+        class="flex flex-col gap-5 md:flex-row"
+        role="group"
+        aria-label="Select an event type"
+      >
+        <!-- Wedding -->
+        <button
+        type="button"
+        class="event-card group bg-cover bg-center text-white"
+        style="background-image: url('{{ '/assets/images/wedding.jpg' | relative_url }}');"
+        data-event-card
+        data-event-type="Wedding"
+        data-selected="false"
+        aria-pressed="false"
+        >
+            <span
+                class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10 transition duration-500 group-hover:from-black/75"
+                aria-hidden="true"
+            ></span>
+
+            <span class="relative z-10 flex h-full w-full flex-col justify-end p-9 sm:p-11">
+            <span class="mb-auto text-sm uppercase tracking-[0.35em] text-white/70">
+              01
+            </span>
+
+            <span class="font-display text-5xl sm:text-6xl">
+              Weddings
+            </span>
+
+            <span class="event-card-description mt-5 max-w-sm text-sm leading-6 text-white/80 sm:text-base">
+              Elegant digital invitations, guest information and thoughtful
+              details for your wedding day.
+            </span>
+
+            <span class="mt-7 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.25em]">
+              Select occasion
+              <span
+                class="text-lg transition-transform duration-500 group-hover:translate-x-2"
+                aria-hidden="true"
+              >
+                →
+              </span>
+            </span>
+          </span>
+        </button>
+
+        <!-- Birthday -->
+        <button
+        type="button"
+        class="event-card group bg-cover bg-center text-white"
+        style="background-image: url('{{ '/assets/images/birthday.jpg' | relative_url }}');"
+        data-event-card
+        data-event-type="Birthday"
+        data-selected="false"
+        aria-pressed="false"
+        >
+            <span
+                class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10 transition duration-500 group-hover:from-black/75"
+                aria-hidden="true"
+            ></span>
+
+            <span class="relative z-10 flex h-full w-full flex-col justify-end p-9 sm:p-11">
+            <span class="mb-auto text-sm uppercase tracking-[0.35em] text-white/70">
+              02
+            </span>
+
+            <span class="font-display text-5xl sm:text-6xl">
+              Birthdays
+            </span>
+
+            <span class="event-card-description mt-5 max-w-sm text-sm leading-6 text-white/80 sm:text-base">
+              Playful, stylish invitations for milestone birthdays, intimate
+              dinners and joyful celebrations.
+            </span>
+
+            <span class="mt-7 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.25em]">
+              Select occasion
+              <span
+                class="text-lg transition-transform duration-500 group-hover:translate-x-2"
+                aria-hidden="true"
+              >
+                →
+              </span>
+            </span>
+          </span>
+        </button>
+
+        <!-- Any Occasion -->
+        <button
+        type="button"
+        class="event-card group bg-cover bg-center text-white"
+        style="background-image: url('{{ '/assets/images/conference.jpg' | relative_url }}');"
+        data-event-card
+        data-event-type="Any Occasion"
+        data-selected="false"
+        aria-pressed="false"
+        >
+            <span
+                class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10 transition duration-500 group-hover:from-black/75"
+                aria-hidden="true"
+            ></span>
+
+            <span class="relative z-10 flex h-full w-full flex-col justify-end p-9 sm:p-11">
+            <span class="mb-auto text-sm uppercase tracking-[0.35em] text-white/70">
+              03
+            </span>
+
+            <span class="font-display text-5xl sm:text-6xl">
+              Anything
+            </span>
+
+            <span class="event-card-description mt-5 max-w-sm text-sm leading-6 text-white/80 sm:text-base">
+              Conferences, concerts, launches, anniversaries and every
+              occasion that deserves a memorable entrance.
+            </span>
+
+            <span class="mt-7 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.25em]">
+              Tell us about it!
+              <span
+                class="text-lg transition-transform duration-500 group-hover:translate-x-2"
+                aria-hidden="true"
+              >
+                →
+              </span>
+            </span>
+          </span>
+        </button>
+      </div>
+
+      <p
+        id="event-selection-message"
+        class="mt-10 text-center text-sm text-neutral-500"
+        aria-live="polite"
+      >
+        Weddings selected
+      </p>
+    </div>
+  </section>
+  <!-- =========================================================
+    FEATURES SECTION
+     ========================================================= -->
+    <section
+    id="features"
+    class="bg-white px-5 py-24 sm:px-8 md:py-32"
+    aria-labelledby="features-heading"
+    >
+    <div class="mx-auto max-w-7xl">
+        <div class="mx-auto mb-20 max-w-2xl text-center">
+        <p class="mb-4 text-xs font-bold uppercase tracking-[0.35em] text-neutral-500">
+            Everything you need
+        </p>
+
+        <h2
+            id="features-heading"
+            class="font-display text-5xl leading-tight tracking-tight sm:text-6xl"
+        >
+            More than an invitation
+        </h2>
+
+        <p class="mx-auto mt-6 max-w-xl text-base leading-7 text-neutral-600">
+            Give your guests one beautiful place to discover the details,
+            respond and prepare for your event.
+        </p>
+        </div>
+
+        <div class="space-y-24 md:space-y-32">
+
+        <!-- Feature 1: Image left, text right -->
+        <article class="grid items-center gap-10 md:grid-cols-2 md:gap-16">
+            <div class="overflow-hidden rounded-[2.5rem]">
+            <img
+                src="{{ '/assets/images/feature-admin.jpg' | relative_url }}"
+                alt="Digital invitation RSVP screen"
+                class="aspect-[4/3] h-full w-full drop-shadow-md object-cover transition-transform duration-700 hover:scale-105"
+                loading="lazy"
+            >
+            </div>
+
+            <div class="md:px-6">
+            <p class="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-neutral-500">
+                Easy guest management
+            </p>
+
+            <h3 class="font-display text-4xl leading-tight sm:text-5xl">
+                Simple online RSVPs
+            </h3>
+
+            <p class="mt-6 max-w-xl text-base leading-8 text-neutral-600">
+                Guests can confirm their attendance directly from your digital
+                invitation. Collect responses, meal preferences and other important
+                details without managing long message threads.
+            </p>
+
+            <ul class="mt-7 space-y-3 text-sm text-neutral-700">
+                <li class="flex items-center gap-3">
+                <span aria-hidden="true">✓</span>
+                Attendance tracking
+                </li>
+
+                <li class="flex items-center gap-3">
+                <span aria-hidden="true">✓</span>
+                Guest preferences
+                </li>
+
+                <li class="flex items-center gap-3">
+                <span aria-hidden="true">✓</span>
+                Mobile-friendly responses
+                </li>
+            </ul>
+            </div>
+        </article>
+
+        <!-- Feature 2: Text left, image right -->
+        <article class="grid items-center gap-10 md:grid-cols-2 md:gap-16">
+            <div class="md:px-6">
+            <p class="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-neutral-500">
+                All the important details
+            </p>
+
+            <h3 class="font-display text-4xl leading-tight sm:text-5xl">
+                Your event in one place
+            </h3>
+
+            <p class="mt-6 max-w-xl text-base leading-8 text-neutral-600">
+                Share the schedule, venue, dress code, directions and any other
+                information your guests need through one carefully designed event
+                page.
+            </p>
+
+            <ul class="mt-7 space-y-3 text-sm text-neutral-700">
+                <li class="flex items-center gap-3">
+                <span aria-hidden="true">✓</span>
+                Event schedules
+                </li>
+
+                <li class="flex items-center gap-3">
+                <span aria-hidden="true">✓</span>
+                Maps and directions
+                </li>
+
+                <li class="flex items-center gap-3">
+                <span aria-hidden="true">✓</span>
+                Dress codes and notices
+                </li>
+            </ul>
+            </div>
+
+            <div class="overflow-hidden rounded-[2.5rem] md:order-last">
+            <img
+                src="{{ '/assets/images/feature-details.jpg' | relative_url }}"
+                alt="Digital event information page"
+                class="aspect-[4/3] h-full w-full drop-shadow-md object-cover transition-transform duration-700 hover:scale-105"
+                loading="lazy"
+            >
+            </div>
+        </article>
+
+        <!-- Feature 3: Image left, text right -->
+        <article class="grid items-center gap-10 md:grid-cols-2 md:gap-16">
+            <div class="overflow-hidden rounded-[2.5rem]">
+            <img
+                src="{{ '/assets/images/feature-design.jpg' | relative_url }}"
+                alt="Custom-designed digital event invitation"
+                class="aspect-[4/3] h-full w-full drop-shadow-md object-cover transition-transform duration-700 hover:scale-105"
+                loading="lazy"
+            >
+            </div>
+
+            <div class="md:px-6">
+            <p class="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-neutral-500">
+                Designed around you
+            </p>
+
+            <h3 class="font-display text-4xl leading-tight sm:text-5xl">
+                A look that feels personal
+            </h3>
+
+            <p class="mt-6 max-w-xl text-base leading-8 text-neutral-600">
+                Every invitation can be styled to match the atmosphere of your
+                occasion, from elegant weddings and joyful birthdays to polished
+                conferences and energetic concerts.
+            </p>
+
+            <ul class="mt-7 space-y-3 text-sm text-neutral-700">
+                <li class="flex items-center gap-3">
+                <span aria-hidden="true">✓</span>
+                Custom colours and typography
+                </li>
+
+                <li class="flex items-center gap-3">
+                <span aria-hidden="true">✓</span>
+                Responsive layouts
+                </li>
+
+                <li class="flex items-center gap-3">
+                <span aria-hidden="true">✓</span>
+                Designs for every occasion
+                </li>
+            </ul>
+            </div>
+        </article>
+
+        </div>
+    </div>
+    </section>
+
+  <!-- =========================================================
+       SECTION 3: CONTACT
+       ========================================================= -->
+  <section
+    id="contact"
+    class="relative flex min-h-[65vh] items-center justify-center overflow-hidden bg-charcoal px-6 py-24 text-center text-white"
+    aria-labelledby="contact-heading"
+  >
+    <div
+      class="absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gold/10 blur-3xl"
+      aria-hidden="true"
+    ></div>
+
+    <div class="relative z-10 mx-auto max-w-3xl">
+      <p class="mb-5 text-xs font-bold uppercase tracking-[0.4em] text-gold">
+        Start your invitation
+      </p>
+
+      <h2
+        id="contact-heading"
+        class="font-display text-5xl leading-tight sm:text-6xl md:text-7xl"
+      >
+        Let’s create something worth celebrating.
+      </h2>
+
+      <a
+        id="contact-button"
+        href="mailto:hello@example.com?subject=Digital%20invitation%20enquiry"
+        class="mt-12 inline-flex min-w-52 items-center justify-center rounded-full bg-white px-9 py-4 text-sm font-bold uppercase tracking-[0.2em] text-charcoal transition duration-300 hover:scale-105 hover:bg-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-charcoal"
+      >
+        Contact us
+      </a>
+    </div>
+  </section>
+</main>
