@@ -1,7 +1,10 @@
 title: Ivory
 description: Digital invitations and event experiences for every occasion.
-url: ""
-baseurl: ""
+url: https://taricohenry.github.io
+baseurl: /
+
+host: 0.0.0.0
+port: 3000
 
 exclude:
   - node_modules
