@@ -1,9 +1,27 @@
 document.addEventListener("DOMContentLoaded", () => {
   const eventCards = document.querySelectorAll("[data-event-card]");
-  const selectionMessage = document.querySelector(
-    "#event-selection-message"
-  );
   const contactButton = document.querySelector("#contact-button");
+  const contactMenu = document.querySelector("#contact-menu");
+  const emailLink = document.querySelector("#email-link");
+
+  const setContactMenuOpen = (isOpen) => {
+    if (!contactButton || !contactMenu) {
+      return;
+    }
+
+    contactMenu.dataset.open = String(isOpen);
+    contactButton.setAttribute("aria-expanded", String(isOpen));
+  };
+
+  contactButton?.addEventListener("click", () => {
+    setContactMenuOpen(contactMenu.dataset.open !== "true");
+  });
+
+  document.addEventListener("click", (event) => {
+    if (contactMenu && !contactMenu.contains(event.target)) {
+      setContactMenuOpen(false);
+    }
+  });
 
   if (!eventCards.length) {
     return;
@@ -20,16 +38,12 @@ document.addEventListener("DOMContentLoaded", () => {
         currentCard.setAttribute("aria-pressed", String(isSelected));
       });
 
-      if (selectionMessage) {
-        selectionMessage.textContent = `${selectedEvent} selected`;
-      }
-
-      if (contactButton) {
+      if (emailLink) {
         const subject = encodeURIComponent(
           `${selectedEvent} digital invitation enquiry`
         );
 
-        contactButton.href = `mailto:hello@example.com?subject=${subject}`;
+        emailLink.href = `mailto:sales@ivory-gy.com?subject=${subject}`;
       }
     });
   });

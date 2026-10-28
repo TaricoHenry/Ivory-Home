@@ -232,14 +232,6 @@ description: Beautiful digital invitations for weddings, birthdays, conferences,
           </span>
         </button>
       </div>
-
-      <p
-        id="event-selection-message"
-        class="mt-10 text-center text-sm text-neutral-500"
-        aria-live="polite"
-      >
-        Weddings selected
-      </p>
     </div>
   </section>
   <!-- =========================================================
@@ -435,13 +427,55 @@ description: Beautiful digital invitations for weddings, birthdays, conferences,
         Let’s create something worth celebrating.
       </h2>
 
-      <a
-        id="contact-button"
-        href="mailto:hello@example.com?subject=Digital%20invitation%20enquiry"
-        class="mt-12 inline-flex min-w-52 items-center justify-center rounded-full bg-white px-9 py-4 text-sm font-bold uppercase tracking-[0.2em] text-charcoal transition duration-300 hover:scale-105 hover:bg-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-charcoal"
+      <div
+        id="contact-menu"
+        class="group/contact relative mt-12 inline-block"
+        data-open="false"
       >
-        Contact us
-      </a>
+        <button
+          id="contact-button"
+          type="button"
+          class="inline-flex min-w-52 items-center justify-center rounded-full bg-white px-9 py-4 text-sm font-bold uppercase tracking-[0.2em] text-charcoal transition duration-300 hover:scale-105 hover:bg-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-charcoal"
+          aria-expanded="false"
+          aria-controls="contact-options"
+        >
+          Contact us
+        </button>
+
+        <div
+          id="contact-options"
+          class="invisible absolute left-1/2 top-full mt-3 flex -translate-x-1/2 items-center gap-3 opacity-0 transition duration-200 group-hover/contact:opacity-100 group-focus-within/contact:visible group-focus-within/contact:opacity-100 data-[open=true]:visible data-[open=true]:opacity-100"
+          role="menu"
+        >
+          <a
+            id="email-link"
+            href="mailto:sales@ivory-gy.com?subject=Digital%20invitation%20enquiry"
+            class="flex size-14 items-center justify-center rounded-full transition hover:scale-105 hover:border-gold hover:bg-gold hover:text-charcoal focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            role="menuitem"
+            aria-label="Email us"
+            title="Email us"
+          >
+            <img
+              src="{{ '/assets/images/social-email.svg' | relative_url }}"
+              alt="Email icon"
+              class="size-6"
+          </a>
+
+          <a
+            href="https://wa.me/592706943?text=Hello%20Ivory%20Invitations%2C%20I%27d%20like%20to%20enquire%20about%20a%20digital%20invitation"
+            class="flex size-14 items-center justify-center rounded-full transition hover:scale-105 hover:border-[#25D366] hover:bg-[#25D366] hover:text-charcoal focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            role="menuitem"
+            aria-label="Contact us on WhatsApp"
+            title="WhatsApp"
+          >
+            <img
+              src="{{ '/assets/images/social-whatsapp.svg' | relative_url }}"
+              alt="WhatsApp icon"
+              class="size-6"
+            >
+          </a>
+        </div>
+      </div>
     </div>
   </section>
 </main>
