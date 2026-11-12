@@ -1,0 +1,135 @@
+# ==========================================================================
+#  Ivory Invite Virtual Meeting — public demo / booking page
+#  Validate with:  ruby scripts/check_event.rb
+# ==========================================================================
+
+# --- Identity -------------------------------------------------------------
+id: ivory-virtual-meeting
+type: corporate
+name: Ivory Invite Virtual Meeting
+host:
+  name: Ivory Invites
+  short_name: IVORY
+  logo: ivory-logo_black.svg      # shown on the thank-you page
+  nav_logo: ivory-logo_black.svg  # top-left, on the white bar
+
+# --- Site / sharing -------------------------------------------------------
+site:
+  url: https://ivory-gy.com       # site origin; used for the share image
+  description: Book a one-hour virtual walkthrough of Ivory digital invitations.
+  favicon: ivory-logo_black.svg
+  lang: en
+
+# --- When -----------------------------------------------------------------
+datetime: 2026-11-17T10:00:00-04:00   # first slot; only used if countdown is turned on
+
+# --- Look: gold and white --------------------------------------------------
+theme:
+  colors:
+    ink: "#2b2416"            # warm near-black text
+    paper: "#ffffff"          # white page
+    muted: "#7d7460"
+    line: "#ece3cf"
+    field: "#d8c79c"          # gold-tinted input borders
+    primary: "#b8912f"        # Ivory gold: buttons, selected states
+    primary-deep: "#8a6a1e"   # deep gold: footer, hero shading
+    hero: "#c9a646"           # gold hero background (no photo)
+    accent: "#a27f24"         # labels, icons, focus rings
+    highlight: "#f1dc9a"
+    highlight-soft: "#f6e7b8" # submit button
+    on-dark: "#ffffff"        # white text on gold
+  fonts:
+    sans: '"Avenir Next", Avenir, "Segoe UI", sans-serif'
+    display: '"Iowan Old Style", "Baskerville", "Palatino Linotype", Georgia, serif'
+
+# --- Features -------------------------------------------------------------
+features:
+  rsvp: form            # custom fields below
+  contributions: false
+  gallery: false
+  countdown: false
+  ivory_credit: false   # it's Ivory's own page
+
+sections:
+  - hero
+  - invitation
+  - footer
+
+# --- Section copy ---------------------------------------------------------
+hero:
+  align: center
+  nav_bar: light                  # white bar across the top
+  carousel:                       # slowly scrolling photo strip behind the hero
+    - hero-wedding.jpg
+    - hero-birthday.jpg
+    - hero-conference.jpg
+  logo: ivory-logo_white.svg      # shown above the title
+  logo_alt: Ivory Invites
+  title_html: Virtual Meeting
+  subtitle_html: 'Online <span class="px-2" aria-hidden="true">·</span> Pick a time below'
+  cta: Book a time
+
+invitation:
+  background:
+    image: spotted-background-2000.jpg   # web-sized copy of spotted-background.jpg
+    tint: true                           # dots turn Ivory gold
+    opacity: 0.05                        # 0 = invisible, 1 = full strength
+  eyebrow: You’re invited
+  greeting_html: 'Hello <span class="text-accent italic" data-greeting-name data-fallback="there">there</span>!'   # "there" becomes the guest's first name as they type
+  body: See what an Ivory invitation looks like from the guest’s side, then choose an hour that suits you.
+  details:
+    - icon: calendar
+      label: When
+      title_html: Schedule below
+    - icon: pin
+      label: Where
+      title_html: Online
+    - icon: shirt
+      label: Dress code
+      title_html: Whatever you like
+
+rsvp:
+  question: Book your meeting
+  subtext: All times are Guyana time (GMT-4).
+  fields:                       # each `name` becomes a key in the request body
+    - name: name                # type: name shows first + last inputs, sent as one `name`
+      label: Your name
+      type: name
+      greeting: true            # first name fills the "Hello there!" greeting
+      required: true
+    - name: email
+      label: Email
+      type: email
+      autocomplete: email
+      placeholder: you@example.com
+      required: true
+    - name: whatsapp
+      label: WhatsApp number
+      type: tel
+      autocomplete: tel
+      inputmode: tel
+      placeholder: "+592 600 0000"
+      required: true
+    - name: timeslot
+      label: Choose a time
+      type: choice              # one button per option; picking one deselects the rest
+      required: true
+      options:                  # value goes to the backend; label is what guests see
+        - { value: "2026-11-17T10:00:00-04:00", label: "Tue 17 Nov · 10:00–11:00 AM" }
+        - { value: "2026-11-17T14:00:00-04:00", label: "Tue 17 Nov · 2:00–3:00 PM" }
+        - { value: "2026-11-18T10:00:00-04:00", label: "Wed 18 Nov · 10:00–11:00 AM" }
+        - { value: "2026-11-19T14:00:00-04:00", label: "Thu 19 Nov · 2:00–3:00 PM" }
+        - { value: "2026-11-20T10:00:00-04:00", label: "Fri 20 Nov · 10:00–11:00 AM" }
+        - { value: "2026-11-21T11:00:00-04:00", label: "Sat 21 Nov · 11:00 AM–12:00 PM" }
+  submit_label: Book my slot
+  footnote: Submitting this lets us know you’re interested, and sends a test confirmation RSVP to your email and WhatsApp.
+
+thank_you:
+  title: You’re booked!
+  subtitle: Check your email and WhatsApp.
+
+# --- Backend --------------------------------------------------------------
+backend:
+  api_base: https://us-central1-ivory-demo.cloudfunctions.net/api/v1/   # TODO: real Functions URL
+  endpoints:
+    submissions: demo-requests   # POST { name, email, whatsapp, timeslot, requestId }

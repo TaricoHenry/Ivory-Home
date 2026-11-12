@@ -1,0 +1,66 @@
+{%- comment -%}
+  Form RSVP: a custom list of fields from event.yml `rsvp.fields`
+  (text, email, tel, textarea, select). Posts every field to
+  backend.endpoints.submissions. Behaviour: assets/js/invitation.js (initFormRsvp).
+{%- endcomment -%}
+{%- assign r = site.data.invitations[page.invitation].rsvp -%}
+<form class="mx-auto max-w-[580px] text-center" id="rsvp" data-rsvp-mode="form" novalidate>
+  <fieldset class="min-w-0 p-0">
+    {% if r.question %}<legend class="w-full font-display text-[30px] tracking-[-.03em]">{{ r.question }}</legend>{% endif %}
+    {% if r.subtext %}<p class="mt-1 mb-[23px] font-display text-sm text-muted italic">{{ r.subtext }}</p>{% endif %}
+
+    <div class="mt-7 grid gap-8 text-left">
+      {% for f in r.fields %}
+      {%- assign field_id = 'field-' | append: f.name -%}
+      {% if f.type == 'name' %}
+      {%- comment -%} First + last name inputs, joined by ivory.js into one `{{ f.name }}` value. {%- endcomment -%}
+      <fieldset class="grid min-w-0 gap-2 p-0">
+        <legend class="field-label mb-2">{{ f.label }}</legend>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="field-label text-[11px] font-semibold text-muted" for="{{ field_id }}-first">{{ f.first_label | default: "First name" }}
+            <input class="field-input" id="{{ field_id }}-first" type="text" maxlength="80" autocomplete="given-name" data-join="{{ f.name }}"{% if f.greeting %} data-greeting-source{% endif %} placeholder="{{ f.first_placeholder | default: 'First name' | escape }}"{% if f.required %} required{% endif %}>
+          </label>
+          <label class="field-label text-[11px] font-semibold text-muted" for="{{ field_id }}-last">{{ f.last_label | default: "Last name" }}
+            <input class="field-input" id="{{ field_id }}-last" type="text" maxlength="80" autocomplete="family-name" data-join="{{ f.name }}" placeholder="{{ f.last_placeholder | default: 'Last name' | escape }}"{% if f.required %} required{% endif %}>
+          </label>
+        </div>
+      </fieldset>
+      {% elsif f.type == 'choice' %}
+      {%- comment -%} One visible button per option; picking one deselects the rest (radio group). {%- endcomment -%}
+      <fieldset class="grid min-w-0 gap-2 p-0" id="{{ field_id }}" data-choice-group="{{ f.name }}" data-label="{{ f.label | escape }}"{% if f.required %} data-required{% endif %}>
+        <legend class="field-label mb-2">{{ f.label }}</legend>
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {% for o in f.options %}
+          <label class="relative block min-w-0 cursor-pointer">
+            <input class="peer sr-only" type="radio" name="{{ f.name }}" value="{{ o.value | default: o | escape }}"{% if f.required %} required{% endif %}>
+            <span class="flex w-full items-center justify-center border border-field bg-paper/60 px-3 py-[15px] text-center text-[14px] font-semibold tracking-[.03em] text-ink transition-colors hover:border-primary peer-checked:border-primary peer-checked:bg-primary peer-checked:text-on-dark peer-focus-visible:outline-2 peer-focus-visible:outline-offset-4 peer-focus-visible:outline-accent">{{ o.label | default: o }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+      {% else %}
+      <label class="field-label" for="{{ field_id }}">
+        {{ f.label }}{% unless f.required %} <span class="text-[11px] font-normal tracking-normal text-muted normal-case">(optional)</span>{% endunless %}
+        {% case f.type %}
+        {% when 'select' %}
+        <select class="field-input" id="{{ field_id }}" name="{{ f.name }}"{% if f.required %} required{% endif %}>
+          <option value="" disabled selected>{{ f.placeholder | default: "Choose an option" }}</option>
+          {% for o in f.options %}
+          <option value="{{ o.value | default: o | escape }}">{{ o.label | default: o }}</option>
+          {% endfor %}
+        </select>
+        {% when 'textarea' %}
+        <textarea class="field-input min-h-28 py-3" id="{{ field_id }}" name="{{ f.name }}" maxlength="{{ f.maxlength | default: 1000 }}" placeholder="{{ f.placeholder | escape }}"{% if f.required %} required{% endif %}></textarea>
+        {% else %}
+        <input class="field-input" id="{{ field_id }}" name="{{ f.name }}" type="{{ f.type | default: 'text' }}" maxlength="{{ f.maxlength | default: 160 }}"{% if f.autocomplete %} autocomplete="{{ f.autocomplete }}"{% endif %}{% if f.inputmode %} inputmode="{{ f.inputmode }}"{% endif %} placeholder="{{ f.placeholder | escape }}"{% if f.required %} required{% endif %}>
+        {% endcase %}
+      </label>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </fieldset>
+
+  <p class="mt-4 min-h-6 text-[13px] leading-[1.5] text-primary" id="rsvp-message" aria-live="polite"></p>
+  <button class="btn-submit" id="submit" type="submit">{{ r.submit_label | default: "Submit" }} <span aria-hidden="true">↗</span></button>
+  {% if r.footnote %}<p class="mx-auto mt-2 max-w-[460px] text-[12px] leading-[1.6] text-muted">{{ r.footnote }}</p>{% endif %}
+</form>

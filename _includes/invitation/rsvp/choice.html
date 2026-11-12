@@ -1,0 +1,8 @@
+{%- comment -%}
+  Yes/No pill. Usage:
+  {% include invitation/rsvp/choice.html name="attendance" value="yes" label="Yes" id="" checked=false %}
+{%- endcomment -%}
+<label class="relative block min-w-0 cursor-pointer">
+  <input class="peer sr-only" type="radio" name="{{ include.name }}" value="{{ include.value }}"{% if include.id %} id="{{ include.id }}"{% endif %}{% if include.checked %} checked{% endif %}>
+  <span class="choice-pill inline-flex w-full min-w-0 items-center justify-between gap-1 border border-field px-2 py-[15px] text-[14px] font-bold tracking-[.045em] transition-colors peer-checked:border-primary peer-checked:bg-primary peer-checked:text-on-dark peer-checked:[&>span]:text-highlight peer-focus-visible:outline-2 peer-focus-visible:outline-offset-4 peer-focus-visible:outline-accent md:px-[17px]">{{ include.label }}<span class="text-sm text-accent" aria-hidden="true">↗</span></span>
+</label>

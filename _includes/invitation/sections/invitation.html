@@ -1,0 +1,43 @@
+{%- assign e = site.data.invitations[page.invitation] -%}
+{%- assign inv = e.invitation -%}
+<section class="show-page section-light relative isolate overflow-hidden bg-paper px-6 py-28 max-md:px-[22px] max-md:py-[82px]" id="invitation" aria-labelledby="invitation-title" hidden>
+  {% include invitation/pattern.html %}
+  {% if inv.background.image %}
+  {%- comment -%} Full-section photo/texture. `tint` blends it with the primary colour (black → gold, white stays white). {%- endcomment -%}
+  <div
+    class="section-bg pointer-events-none absolute inset-0 z-0{% unless inv.background.tint == false %} section-bg--tint{% endunless %}"
+    aria-hidden="true"
+    style="background-image: url('{{ '/assets/images/' | append: inv.background.image | relative_url }}'); opacity: {{ inv.background.opacity | default: 0.35 }};"
+  ></div>
+  {% endif %}
+  <div class="relative z-10 mx-auto w-full max-w-[990px]">
+    <div class="mx-auto max-w-[710px] text-center">
+      {% if inv.eyebrow %}<p class="mb-[19px] text-[10px] leading-[1.5] font-bold tracking-[.22em] text-accent uppercase">{{ inv.eyebrow }}</p>{% endif %}
+      <h2 id="invitation-title" data-scroll-reveal="up" class="m-0 mb-[17px] flex items-center justify-center gap-2 font-display text-[clamp(45px,7vw,76px)] leading-none font-normal tracking-[-.055em]">
+        {% if inv.greeting_decor %}<img class="greeting-decor object-contain" src="{{ '/assets/images/' | append: inv.greeting_decor | relative_url }}" alt="" aria-hidden="true">{% endif %}
+        <span data-guest-greeting>{{ inv.greeting_html }}</span>
+        {% if inv.greeting_decor %}<img class="greeting-decor -scale-x-100 object-contain" src="{{ '/assets/images/' | append: inv.greeting_decor | relative_url }}" alt="" aria-hidden="true">{% endif %}
+      </h2>
+      {% if inv.body %}<p class="mx-auto max-w-[580px] font-display text-lg leading-[1.7] text-muted">{{ inv.body }}</p>{% endif %}
+    </div>
+
+    {% if inv.details and inv.details.size > 0 %}
+    <div id="event-details" data-scroll-reveal="right" class="my-[60px] grid grid-cols-1 border-y border-primary-deep max-md:my-[42px] md:grid-cols-{{ inv.details.size | at_most: 3 }}">
+      {% for d in inv.details %}
+      <div data-scroll-reveal="up" class="flex min-h-[112px] flex-col justify-center border-b border-line px-[30px] py-[17px] text-center last:border-b-0 md:min-h-[145px] md:border-b-0 md:py-[22px] {% unless forloop.first %}md:border-l{% endunless %}">
+        {% if d.icon %}<span class="mx-auto mb-[10px] text-accent">{% include invitation/icon.html name=d.icon %}</span>{% endif %}
+        <span class="mb-[10px] text-[9px] font-bold tracking-[.2em] text-accent uppercase">{{ d.label }}</span>
+        <span class="font-display text-lg">{{ d.title_html }}</span>
+        {% if d.subtitle %}<span class="mt-1 text-[11px] text-muted">{{ d.subtitle }}</span>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% case e.features.rsvp %}
+      {% when 'open' %}{% include invitation/rsvp/open.html %}
+      {% when 'personal' %}{% include invitation/rsvp/personal.html %}
+      {% when 'form' %}{% include invitation/rsvp/form.html %}
+    {% endcase %}
+  </div>
+</section>

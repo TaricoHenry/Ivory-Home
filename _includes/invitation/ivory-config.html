@@ -1,0 +1,16 @@
+{%- comment -%}
+  Exposes the parts of event.yml the browser needs as window.IVORY.
+  Only public settings belong here — never secrets.
+{%- endcomment -%}
+{%- assign e = site.data.invitations[page.invitation] -%}
+<script>
+  window.IVORY = {
+    eventId: {{ e.id | jsonify }},
+    datetime: {{ e.datetime | date_to_xmlschema | jsonify }},
+    features: {{ e.features | jsonify }},
+    apiBase: {{ e.backend.api_base | jsonify }},
+    endpoints: {{ e.backend.endpoints | jsonify }},
+    rsvp: {{ e.rsvp | jsonify }},
+    thankYouUrl: {{ '/invitations/' | append: page.invitation | append: '/thank-you/' | relative_url | jsonify }}
+  };
+</script>

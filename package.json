@@ -5,11 +5,14 @@
   "main": "index.js",
   "scripts": {
     "dev:css": "npx @tailwindcss/cli -i ./assets/css/input.css -o ./assets/css/main.css --watch",
+    "dev:css:invitations": "npx @tailwindcss/cli -i ./assets/css/invitation-input.css -o ./assets/css/invitation.css --watch",
     "dev:jekyll": "bundle exec jekyll serve --livereload",
-    "dev": "concurrently \"npm:dev:css\" \"npm:dev:jekyll\"",
-    "build:css": "npx @tailwindcss/cli -i ./assets/css/input.css -o ./assets/css/main.css --minify",
+    "dev": "concurrently \"npm:dev:css\" \"npm:dev:css:invitations\" \"npm:dev:jekyll\"",
+    "build:css": "npx @tailwindcss/cli -i ./assets/css/input.css -o ./assets/css/main.css --minify && npm run build:css:invitations",
+    "build:css:invitations": "npx @tailwindcss/cli -i ./assets/css/invitation-input.css -o ./assets/css/invitation.css --minify",
     "build:jekyll": "bundle exec jekyll build",
-    "build": "npm run build:css && npm run build:jekyll"
+    "check:invitations": "ruby scripts/check_invitation.rb",
+    "build": "npm run check:invitations && npm run build:css && npm run build:jekyll"
   },
   "keywords": [],
   "author": "",

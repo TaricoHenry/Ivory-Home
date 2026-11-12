@@ -1,0 +1,8 @@
+{%- assign e = site.data.invitations[page.invitation] -%}
+<footer class="flex min-h-[105px] items-center justify-between gap-5 bg-primary-deep px-[clamp(22px,6vw,88px)] py-[25px] text-on-dark max-md:flex-wrap max-md:justify-center max-md:text-center">
+  {% if e.site.favicon_png %}<img class="size-4" src="{{ '/assets/images/' | append: e.site.favicon_png | relative_url }}" alt="" aria-hidden="true">{% endif %}
+  <a class="text-[9px] tracking-[.1em] text-on-dark/75 uppercase focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent" href="#hero-title">Back to the beginning ↑</a>
+</footer>
+{% if e.features.ivory_credit %}
+<div class="bg-primary-deep px-6 pb-7 text-on-dark">{% include invitation/ivory-credit.html dark=true %}</div>
+{% endif %}

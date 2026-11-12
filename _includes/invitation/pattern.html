@@ -1,0 +1,9 @@
+{%- comment -%} Optional repeating background. Usage: {% include invitation/pattern.html dark=true %} {%- endcomment -%}
+{%- assign p = site.data.invitations[page.invitation].theme.pattern -%}
+{%- if p and p.image -%}
+<div
+  class="pattern-layer pointer-events-none absolute inset-0 z-0{% if include.dark %} pattern-layer--dark{% endif %}"
+  aria-hidden="true"
+  style="background-image: url('{{ '/assets/images/' | append: p.image | relative_url }}'); background-size: {{ p.size | default: 'auto' }};{% if include.dark %} opacity: {{ p.dark_opacity | default: 0.18 }};{% endif %}"
+></div>
+{%- endif -%}

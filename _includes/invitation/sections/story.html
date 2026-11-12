@@ -1,0 +1,18 @@
+{%- comment -%} Alternating photo + caption timeline from event.story. {%- endcomment -%}
+{%- assign story = site.data.invitations[page.invitation].story -%}
+{%- if story and story.size > 0 -%}
+<section class="show-page relative isolate overflow-hidden bg-paper px-6 py-24 max-md:px-[22px]" aria-label="Our story" hidden>
+  {% include invitation/pattern.html %}
+  <div class="relative z-10 mx-auto grid w-full max-w-[990px] gap-20">
+    {% for s in story %}
+    <div data-scroll-reveal="up" class="grid items-center gap-8 md:grid-cols-2">
+      <img class="w-full shadow-xl {% cycle '', 'md:order-2' %}" src="{{ '/assets/images/' | append: s.image | relative_url }}" alt="{{ s.alt | default: '' | escape }}" loading="lazy">
+      <div class="text-center md:text-left">
+        {% if s.year %}<p class="m-0 font-display text-[clamp(40px,6vw,64px)] leading-none tracking-[-.05em] text-primary">{{ s.year }}</p>{% endif %}
+        {% if s.text %}<p class="mt-4 font-display text-lg leading-[1.7] text-muted">{{ s.text }}</p>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{%- endif -%}

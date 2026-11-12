@@ -1,0 +1,19 @@
+{%- comment -%}
+  Turns theme.colors / theme.fonts in _data/invitations/<slug>.yml into the CSS variables
+  Tailwind v4 utilities read (bg-primary -> var(--color-primary), etc.).
+  Defaults live in assets/css/invitation-input.css; these override them per event.
+{%- endcomment -%}
+{%- assign t = site.data.invitations[page.invitation].theme -%}
+<style>
+  :root {
+    {%- for c in t.colors %}
+    --color-{{ c[0] }}: {{ c[1] }};
+    {%- endfor %}
+    {%- if t.fonts.sans %}
+    --font-sans: {{ t.fonts.sans }};
+    {%- endif %}
+    {%- if t.fonts.display %}
+    --font-display: {{ t.fonts.display }};
+    {%- endif %}
+  }
+</style>

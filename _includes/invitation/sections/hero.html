@@ -1,0 +1,57 @@
+{%- assign e = site.data.invitations[page.invitation] -%}
+{%- assign h = e.hero -%}
+<section class="relative min-h-[min(810px,94svh)] overflow-hidden bg-hero text-on-dark max-md:min-h-[min(760px,92svh)]" aria-labelledby="hero-title">
+  {% if h.image %}
+  <img
+    class="absolute inset-0 size-full object-cover"
+    style="object-position: {{ h.image_position | default: 'center' }}"
+    src="{{ '/assets/images/' | append: h.image | relative_url }}"
+    alt="{{ h.image_alt | escape }}"
+    fetchpriority="high"
+  >
+  {% endif %}
+  {% if h.carousel and h.carousel.size > 0 %}
+  {%- comment -%} Endless photo strip: two copies of the set, slid left by one set's width (assets/css/invitation-input.css). {%- endcomment -%}
+  <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+    <div class="hero-carousel-track">
+      {% for copy in (1..2) %}
+      <div class="hero-carousel-set">
+        {% for slide in h.carousel %}
+        <figure class="hero-carousel-slide"><img src="{{ '/assets/images/' | append: slide | relative_url }}" alt="" width="1600" height="1066"{% if copy == 1 and forloop.first %} fetchpriority="high"{% else %} loading="lazy"{% endif %}></figure>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="hero-carousel-shade pointer-events-none absolute inset-0"></div>
+  {% else %}
+  <div class="hero-overlay pointer-events-none absolute inset-0"></div>
+  {% endif %}
+
+  {%- assign light_bar = false -%}{%- if h.nav_bar == 'light' -%}{%- assign light_bar = true -%}{%- endif -%}
+  <div class="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-[clamp(22px,6vw,88px)] {% if light_bar %}border-b border-line bg-paper py-4 text-ink shadow-[0_1px_12px_rgb(0_0_0/0.06)] max-md:py-3{% else %}py-7 text-on-dark max-md:py-[23px]{% endif %} max-md:px-[22px]">
+    <a class="inline-flex items-center gap-3 text-[15px] font-semibold tracking-[.14em] uppercase max-md:gap-2 max-md:text-[12px]" href="#invitation" aria-label="{{ e.name | escape }} invitation">
+      {% if e.host.nav_logo %}
+      <img class="h-9 w-auto max-md:h-7" src="{{ '/assets/images/' | append: e.host.nav_logo | relative_url }}" alt="{{ e.host.name | escape }}">
+      {% else %}
+      {% if e.site.favicon_png %}<img class="size-6" src="{{ '/assets/images/' | append: e.site.favicon_png | relative_url }}" alt="" aria-hidden="true">{% endif %}
+      <span>{{ e.host.short_name | default: e.host.name }}</span>
+      {% endif %}
+    </a>
+    {% if e.features.gallery %}
+    <a class="inline-flex items-center gap-[9px] border-b border-current/55 pb-[5px] text-[10px] font-semibold tracking-[.14em] uppercase max-md:text-[9px]" href="{{ '/invitations/' | append: page.invitation | append: '/gallery/' | relative_url }}">View gallery <span aria-hidden="true">↗</span></a>
+    {% endif %}
+  </div>
+
+  <div class="relative z-10 mx-auto flex min-h-[min(810px,94svh)] max-w-[1240px] flex-col {% if h.align == 'center' %}items-center text-center{% else %}items-start{% endif %} justify-center px-[8vw] pt-[120px] pb-[110px] max-md:min-h-[min(760px,92svh)] max-md:px-[25px] max-md:pt-[125px] max-md:pb-[105px]">
+    {% if h.logo %}<img class="mb-8 h-auto w-[clamp(150px,24vw,280px)] max-md:mb-6" src="{{ '/assets/images/' | append: h.logo | relative_url }}" alt="{{ h.logo_alt | default: e.host.name | escape }}">{% endif %}
+    {% if h.eyebrow %}<p class="hero-shine mb-4 font-sans text-[25px] leading-[1.5] font-semibold tracking-[.2em] uppercase max-md:text-[13px]">{{ h.eyebrow }}</p>{% endif %}
+    <h1 id="hero-title" class="m-0 font-display text-[clamp(54px,11vw,138px)] leading-[.78] font-normal tracking-[-.075em]">
+      {{ h.title_html | default: e.name }}
+    </h1>
+    {% if h.subtitle_html %}<p class="mt-8 mb-[30px] font-display text-[clamp(16px,2vw,21px)] tracking-[.02em]">{{ h.subtitle_html }}</p>{% endif %}
+    {% if h.cta %}
+    <a class="btn-hero show-page inline-flex items-center gap-14 rounded-lg border px-9 py-7 text-[20px] font-bold tracking-[.15em] uppercase focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent max-md:gap-4 max-md:px-5 max-md:py-5 max-md:text-xs" href="#invitation" data-smooth-scroll hidden>{{ h.cta }} <span aria-hidden="true">↓</span></a>
+    {% endif %}
+  </div>
+</section>

@@ -1,0 +1,45 @@
+{%- comment -%}
+  "Bring something" section. Menu items come from backend.endpoints.food_items.
+  Shown only after the guest answers Yes in the open RSVP form.
+{%- endcomment -%}
+{%- assign e = site.data.invitations[page.invitation] -%}
+{%- if e.features.contributions -%}
+{%- assign c = e.contributions -%}
+<section class="relative isolate overflow-hidden bg-primary px-6 py-28 text-on-dark max-md:px-[22px] max-md:py-[82px]" id="bring" aria-labelledby="bring-title" hidden>
+  {% include invitation/pattern.html dark=true %}
+  <div class="relative z-10 mx-auto w-full max-w-[1100px]">
+    <div class="mb-[55px] grid grid-cols-2 items-end gap-x-12 max-md:mb-[38px] max-md:grid-cols-1 max-md:gap-5">
+      {% if c.eyebrow %}<p class="col-span-full mb-[18px] text-[10px] leading-[1.5] font-bold tracking-[.22em] text-highlight uppercase max-md:col-span-1 max-md:mb-0">{{ c.eyebrow }}</p>{% endif %}
+      <h2 id="bring-title" class="m-0 font-display text-[clamp(48px,7vw,82px)] leading-[.92] font-normal tracking-[-.075em]">{{ c.title_html }}</h2>
+      {% if c.body %}<p class="mb-[5px] max-w-[330px] justify-self-end font-display text-base leading-[1.7] text-on-dark/75 max-md:justify-self-start">{{ c.body }}</p>{% endif %}
+    </div>
+
+    <form id="dish-form">
+      <fieldset class="min-w-0 p-0">
+        <legend class="sr-only">Choose something to bring</legend>
+        <div class="grid grid-cols-1 border-t border-l border-on-dark/25 min-[390px]:grid-cols-2 md:grid-cols-3" id="food-options"></div>
+        <p class="m-0 py-4 text-[12px] text-on-dark/70" id="food-options-message" aria-live="polite">Loading the menu…</p>
+      </fieldset>
+      <div class="flex items-center justify-between gap-[18px] pt-6 max-[389px]:flex-col max-[389px]:items-start">
+        <p class="m-0 text-[11px] text-on-dark/70" id="dish-count" aria-live="polite">Nothing selected yet</p>
+      </div>
+    </form>
+  </div>
+</section>
+<div class="bg-primary-deep px-6 pb-10 text-center max-md:px-[22px]" id="submit-wrapper" hidden>
+  <button class="btn-submit" id="submit" type="submit" form="rsvp">{{ e.rsvp.submit_label | default: "Submit response" }} <span aria-hidden="true">↗</span></button>
+</div>
+
+{%- comment -%} Template for one menu item; ivory.js clones it per item. {%- endcomment -%}
+<template id="food-option-template">
+  <label class="group relative flex min-h-[54px] cursor-pointer items-center gap-[9px] border-r border-b border-on-dark/25 px-[10px] py-2 font-display text-sm leading-[1.35] transition-colors hover:bg-white/7 md:min-h-[68px] md:gap-[12px] md:px-[14px]">
+    <input class="peer sr-only" type="checkbox" name="dish">
+    <span class="shrink-0 font-sans text-[9px] tracking-[.1em] text-highlight" data-slot="number"></span>
+    <span class="min-w-0 flex-1 leading-tight">
+      <span class="block text-sm leading-tight" data-slot="name"></span>
+      <span class="mt-0.5 block font-sans text-[9px] leading-none text-on-dark/65" data-slot="unit"></span>
+    </span>
+    <span class="ml-auto grid size-[21px] shrink-0 place-items-center rounded-full border border-on-dark/50 font-sans text-sm text-transparent transition-colors peer-checked:border-highlight peer-checked:bg-highlight peer-checked:text-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-4 peer-focus-visible:outline-on-dark" aria-hidden="true">+</span>
+  </label>
+</template>
+{%- endif -%}

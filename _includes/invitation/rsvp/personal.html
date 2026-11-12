@@ -1,0 +1,18 @@
+{%- comment -%}
+  Personal RSVP: each household gets a link like /?token=ABC123.
+  ivory.js (initPersonalRsvp) loads the household, swaps the greeting for
+  the household name and renders one checkbox per member.
+  Without a valid token the form stays hidden.
+{%- endcomment -%}
+{%- assign r = site.data.invitations[page.invitation].rsvp -%}
+<form class="mx-auto max-w-[580px] text-center" id="rsvp" data-rsvp-mode="personal" novalidate hidden>
+  <fieldset class="min-w-0 p-0">
+    <legend class="w-full font-display text-[30px] tracking-[-.03em]">{{ r.question }}</legend>
+    {% if r.subtext %}<p class="mt-1 mb-[23px] font-display text-sm text-muted italic">{{ r.subtext }}</p>{% endif %}
+    <div class="grid gap-3 text-left" id="rsvp-members" aria-live="polite"></div>
+  </fieldset>
+  <p class="mt-4 min-h-6 text-[13px] leading-[1.5] text-primary" id="rsvp-message" aria-live="polite"></p>
+  <div id="submit-wrapper" class="mt-6">
+    <button class="btn-submit" id="submit" type="submit">{{ r.submit_label | default: "Submit response" }} <span aria-hidden="true">↗</span></button>
+  </div>
+</form>

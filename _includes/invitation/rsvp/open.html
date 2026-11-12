@@ -1,0 +1,51 @@
+{%- comment -%}
+  Open RSVP: anyone with the link registers by name (optionally a plus-one).
+  Behaviour lives in assets/js/invitation.js (initOpenRsvp).
+{%- endcomment -%}
+{%- assign e = site.data.invitations[page.invitation] -%}
+{%- assign r = e.rsvp -%}
+<form class="mx-auto max-w-[580px] text-center" id="rsvp" data-rsvp-mode="open" novalidate>
+  <fieldset class="min-w-0 p-0">
+    <legend class="w-full font-display text-[30px] tracking-[-.03em]">{{ r.question }}</legend>
+    {% if r.subtext %}<p class="mt-1 mb-[23px] font-display text-sm text-muted italic">{{ r.subtext }}</p>{% endif %}
+    <div class="grid grid-cols-2 gap-3">
+      {% include invitation/rsvp/choice.html name="attendance" value="yes" label="Yes" %}
+      {% include invitation/rsvp/choice.html name="attendance" value="no" label="No" %}
+    </div>
+
+    <div class="mt-7 grid gap-8 text-left" id="guest-details" hidden>
+      <label class="field-label" for="guest-name">
+        {{ r.name_label | default: "Your name" }}
+        <input class="field-input" id="guest-name" name="name" type="text" maxlength="160" autocomplete="name" placeholder="Enter your full name" required>
+      </label>
+
+      {% if e.features.plus_one %}
+      <fieldset class="grid min-w-0 gap-4 p-0">
+        <legend class="w-full text-center font-display text-[30px] tracking-[-.03em]">{{ r.plus_one_question | default: "Are you bringing a plus one?" }}</legend>
+        <div class="mt-4 grid grid-cols-2 gap-3">
+          {% include invitation/rsvp/choice.html name="plusOneChoice" value="yes" label="Yes" id="plus-one" %}
+          {% include invitation/rsvp/choice.html name="plusOneChoice" value="no" label="No" id="plus-one-no" checked=true %}
+        </div>
+      </fieldset>
+      <div class="grid gap-4" id="plus-one-details" hidden>
+        <label class="field-label" for="plus-one-name">
+          {{ r.plus_one_label | default: "Plus-one name" }}
+          <input class="field-input" id="plus-one-name" name="plusOneName" type="text" maxlength="160" autocomplete="off" placeholder="Enter the name of your plus one">
+        </label>
+      </div>
+      {% endif %}
+    </div>
+  </fieldset>
+
+  <p class="mt-4 min-h-6 text-[13px] leading-[1.5] text-primary" id="rsvp-message" aria-live="polite"></p>
+
+  {% if e.features.contributions %}
+  <a class="inline-flex max-w-full flex-wrap items-center justify-center gap-4 rounded-lg border border-primary px-4 py-4 text-center font-bold tracking-[.15em] text-primary uppercase transition-colors duration-500 hover:bg-primary hover:text-on-dark focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent md:px-9 md:py-7" id="contribution-prompt" href="#bring" data-smooth-scroll hidden>
+    <span class="text-[12px] leading-3">{{ r.contribution_prompt | default: "Please select your contribution below ↓" }}</span>
+  </a>
+  {% else %}
+  <div id="submit-wrapper" class="mt-6" hidden>
+    <button class="btn-submit" id="submit" type="submit">{{ r.submit_label | default: "Submit response" }} <span aria-hidden="true">↗</span></button>
+  </div>
+  {% endif %}
+</form>

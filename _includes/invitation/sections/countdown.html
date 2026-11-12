@@ -1,0 +1,14 @@
+{%- comment -%} Live countdown to event.datetime. Enable with features.countdown. {%- endcomment -%}
+{%- if site.data.invitations[page.invitation].features.countdown -%}
+<section class="show-page bg-paper px-6 py-16 text-center" aria-label="Countdown" hidden>
+  <div class="mx-auto grid max-w-[640px] grid-cols-4 gap-3" data-countdown>
+    {% assign units = "days,hours,minutes,seconds" | split: "," %}
+    {% for unit in units %}
+    <div class="border border-line px-2 py-5">
+      <p class="m-0 font-display text-[clamp(28px,6vw,48px)] leading-none text-primary" data-countdown-{{ unit }}>00</p>
+      <p class="m-0 mt-2 text-[9px] font-bold tracking-[.2em] text-accent uppercase">{{ unit }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{%- endif -%}

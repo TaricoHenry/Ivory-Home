@@ -1,0 +1,15 @@
+---
+invitation: demo                 # reads _data/invitations/demo.yml
+permalink: /invitations/demo/
+---
+{%- comment -%}
+  The page is assembled from _data/invitations/<slug>.yml `sections`, in order.
+  To add a new kind of section, create _includes/sections/<name>.html
+  and add <name> to the list in event.yml.
+{%- endcomment -%}
+<main>
+  {%- for section in site.data.invitations[page.invitation].sections %}
+  {%- assign section_file = 'sections/' | append: section | append: '.html' %}
+  {% include invitation/{{ section_file }} %}
+  {%- endfor %}
+</main>

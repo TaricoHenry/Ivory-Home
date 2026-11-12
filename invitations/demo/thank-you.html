@@ -1,0 +1,21 @@
+---
+invitation: demo
+title: Thank You
+permalink: /invitations/demo/thank-you/
+---
+{%- assign e = site.data.invitations[page.invitation] -%}
+<main class="relative isolate flex min-h-screen flex-col items-center overflow-hidden bg-paper px-6 pt-[18vh] pb-[12vh] text-center">
+  {% include invitation/pattern.html %}
+  <div class="relative z-10 flex flex-col items-center">
+    {% if e.host.logo %}<img class="size-20 object-contain" src="{{ '/assets/images/' | append: e.host.logo | relative_url }}" alt="{{ e.host.name | escape }}">{% endif %}
+    {% if e.host.short_name %}<span class="mt-2 mb-6 font-sans text-sm font-bold tracking-[.2em] text-highlight">{{ e.host.short_name }}</span>{% endif %}
+    <h1 class="m-0 font-display text-[clamp(48px,8vw,88px)] leading-none font-normal tracking-[-.05em] text-primary">
+      {{ e.thank_you.title | default: "Thank you!" }}
+      {% if e.thank_you.subtitle %}<br><span class="text-[.5em] tracking-[-.045em] text-accent">{{ e.thank_you.subtitle }}</span>{% endif %}
+    </h1>
+    <a class="mt-10 text-[10px] font-bold tracking-[.15em] text-primary uppercase underline underline-offset-4" href="{{ '/invitations/' | append: page.invitation | append: '/' | relative_url }}" data-keep-token>Back to the invitation</a>
+  </div>
+  {% if e.features.ivory_credit %}
+  <div class="thank-you-credit relative z-10 mt-auto pt-24 text-black">{% include invitation/ivory-credit.html %}</div>
+  {% endif %}
+</main>

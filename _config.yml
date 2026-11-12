@@ -13,3 +13,14 @@ exclude:
   - package-lock.json
   - assets/css/input.css
   - README.md
+  - assets/css/invitation-input.css
+  - scripts
+  - docs
+
+# Invitation pages: /invitations/<slug>/ reads _data/invitations/<slug>.yml
+# (set `invitation: <slug>` in the page's front matter).
+defaults:
+  - scope:
+      path: "invitations"
+    values:
+      layout: invitation

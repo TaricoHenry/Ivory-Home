@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* Invitation pages have their own bundle (invitation-input.css); keep their classes out of main.css. */
+@source not "../../_includes/invitation";
+@source not "../../_layouts/invitation.html";
+@source not "../../invitations";
+@source not "../../_data/invitations";
+@source not "../js/invitation.js";
+@source not "./invitation.css";
+
 @theme {
   --font-display: Georgia, "Times New Roman", serif;
   --font-body: Inter, ui-sans-serif, system-ui, sans-serif;
