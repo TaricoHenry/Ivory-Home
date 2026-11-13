@@ -112,17 +112,22 @@ rsvp:
       required: true
     - name: timeslot
       label: Choose a time
-      type: choice              # one button per option; picking one deselects the rest
+      type: choice              # one button per slot; picking one deselects the rest
       required: true
-      options:                  # value goes to the backend; label is what guests see
-        - { value: "2026-11-17T10:00:00-04:00", label: "Tue 17 Nov · 10:00–11:00 AM" }
-        - { value: "2026-11-17T14:00:00-04:00", label: "Tue 17 Nov · 2:00–3:00 PM" }
-        - { value: "2026-11-18T10:00:00-04:00", label: "Wed 18 Nov · 10:00–11:00 AM" }
-        - { value: "2026-11-19T14:00:00-04:00", label: "Thu 19 Nov · 2:00–3:00 PM" }
-        - { value: "2026-11-20T10:00:00-04:00", label: "Fri 20 Nov · 10:00–11:00 AM" }
-        - { value: "2026-11-21T11:00:00-04:00", label: "Sat 21 Nov · 11:00 AM–12:00 PM" }
+      schedule:                 # slots are built in the browser from today's date
+        days_ahead: 7           # tomorrow through a week from today
+        utc_offset: "-04:00"    # Guyana time; also sent in each slot's value
+        hours:                  # 24-hour "start-end"; a day left out has no slots
+          weekdays: ["17:30-18:30", "18:30-19:30"]   # Mon–Fri
+          sat: ["10:00-11:00", "13:00-14:00"]
+        blocked:                # shown as "Booked" (display only, nothing is reserved)
+          seed: ivory           # change this word to reshuffle which slots look taken
+          near_percent: 50      # chance a slot tomorrow shows as booked
+          far_percent: 15       # chance a slot on the last day shown is booked
+          min_booked: 2         # always at least this many booked
+          max_share: 0.5        # never more than this share of slots booked
   submit_label: Book my slot
-  footnote: Submitting this lets us know you’re interested, and sends a test confirmation RSVP to your email and WhatsApp.
+  footnote: Submitting this lets us know you’re interested.
 
 thank_you:
   title: You’re booked!

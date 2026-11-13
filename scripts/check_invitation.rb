@@ -75,8 +75,35 @@ if rsvp == "form"
       names << f["name"]
       type = f["type"] || "text"
       errors << "#{where}.type must be text, email, tel, textarea, select, choice or name" unless %w[text email tel textarea select choice name].include?(type)
-      if %w[select choice].include?(type) && !(f["options"].is_a?(Array) && f["options"].any?)
-        errors << "#{where} is a #{type}, so it needs options"
+      if %w[select choice].include?(type) && !(f["options"].is_a?(Array) && f["options"].any?) && !(type == "choice" && f["schedule"].is_a?(Hash))
+        errors << "#{where} is a #{type}, so it needs options#{type == 'choice' ? ' or a schedule' : ''}"
+      end
+      if type == "choice" && f["schedule"].is_a?(Hash)
+        sched = f["schedule"]
+        hours = sched["hours"]
+        if !hours.is_a?(Hash) || hours.empty?
+          errors << "#{where}.schedule.hours needs at least one day"
+        else
+          hours.each do |day, ranges|
+            errors << "#{where}.schedule.hours.#{day}: use weekdays, mon, tue, wed, thu, fri, sat or sun" unless %w[weekdays mon tue wed thu fri sat sun].include?(day)
+            Array(ranges).each do |r|
+              errors << "#{where}.schedule.hours.#{day}: #{r.inspect} should look like \"17:30-18:30\"" unless r.to_s.match?(/\A\d{2}:\d{2}-\d{2}:\d{2}\z/)
+            end
+          end
+        end
+        errors << "#{where}.schedule.utc_offset should look like \"-04:00\"" unless sched["utc_offset"].to_s.match?(/\A[+-]\d{2}:\d{2}\z/)
+        blocked = sched["blocked"]
+        if blocked.is_a?(Hash)
+          %w[near_percent far_percent].each do |k|
+            v = blocked[k]
+            errors << "#{where}.schedule.blocked.#{k} must be a number from 0 to 100" unless v.nil? || (v.is_a?(Numeric) && v.between?(0, 100))
+          end
+          share = blocked["max_share"]
+          errors << "#{where}.schedule.blocked.max_share must be between 0 and 1" unless share.nil? || (share.is_a?(Numeric) && share.between?(0, 1))
+          if blocked.key?("count") || blocked.key?("day_multiple") || blocked.key?("day_of_year_multiple")
+            warnings << "#{where}.schedule.blocked: count / day_multiple / day_of_year_multiple are no longer used (see near_percent, far_percent)"
+          end
+        end
       end
     end
     dupes = names.select { |n| names.count(n) > 1 }.uniq

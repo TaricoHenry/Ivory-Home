@@ -133,6 +133,9 @@
     text-transform: uppercase;
   }
   .field-input {
+    /* Inputs have a built-in minimum width; without these they overflow narrow grid columns. */
+    width: 100%;
+    min-width: 0;
     min-height: 3rem;
     border: 1px solid var(--color-field);
     background: rgb(255 255 255 / .6);

@@ -321,9 +321,172 @@
     });
   }
 
+  // ------------------------------------------------------ booking slots
+  // A `choice` field with a `schedule` gets its buttons built here: every
+  // opening time for the next `days_ahead` days, in the event's time zone.
+  // Some slots show as already booked so the calendar looks in demand. That is
+  // cosmetic only, and fully deterministic (no Math.random): every visitor sees
+  // the same slots taken on a given day, and a reload changes nothing.
+  const DAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+  const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const pad = (n) => String(n).padStart(2, "0");
+
+  // FNV-1a plus a final mix: a tiny, stable hash whose output looks random
+  // but is always the same for the same text.
+  function hashString(text) {
+    let hash = 2166136261;
+    for (const ch of text) {
+      hash ^= ch.charCodeAt(0);
+      hash = Math.imul(hash, 16777619);
+    }
+    hash ^= hash >>> 16;
+    hash = Math.imul(hash, 0x85ebca6b);
+    hash ^= hash >>> 13;
+    hash = Math.imul(hash, 0xc2b2ae35);
+    hash ^= hash >>> 16;
+    return hash >>> 0;
+  }
+
+  function formatTime(hhmm) {
+    const [h, m] = hhmm.split(":").map(Number);
+    return { text: `${h % 12 || 12}:${pad(m)}`, meridiem: h < 12 ? "AM" : "PM" };
+  }
+
+  function formatRange(start, end) {
+    const a = formatTime(start);
+    const b = formatTime(end);
+    return a.meridiem === b.meridiem
+      ? `${a.text}–${b.text} ${b.meridiem}`
+      : `${a.text} ${a.meridiem}–${b.text} ${b.meridiem}`;
+  }
+
+  // "Fills up as it nears". Each slot has a fixed number, 0–99, from its date,
+  // time and `seed`. It shows as booked when that number is below a cut-off
+  // that rises from `far_percent` (the last day shown) to `near_percent`
+  // (tomorrow). A slot's number never changes and its cut-off only rises, so
+  // once a slot is booked it stays booked on every later day.
+  // Guards: at least `min_booked` slots are booked (the ones nearest their
+  // cut-off), and at most `max_share` of all slots, so plenty stay open.
+  function markBooked(days, rule = {}, daysAhead = 7) {
+    const near = rule.near_percent ?? 50;
+    const far = rule.far_percent ?? 15;
+    const seed = rule.seed ?? "";
+    const all = days.flatMap((day) => day.slots.map((slot) => {
+      const step = daysAhead > 1 ? (day.daysAway - 1) / (daysAhead - 1) : 0;
+      const cutoff = near + (far - near) * step;
+      // Below 0: under the cut-off (booked). The closer to 0, the nearer it is to tipping.
+      return { slot, margin: (hashString(`${seed}|${slot.value}`) % 100) - cutoff };
+    }));
+    if (all.length < 2) return;
+    all.sort((a, b) => a.margin - b.margin);
+    const minBooked = Math.min(rule.min_booked ?? 2, all.length - 1);
+    const maxBooked = Math.max(minBooked, Math.floor(all.length * (rule.max_share ?? 0.5)));
+    const booked = Math.min(Math.max(all.filter((s) => s.margin < 0).length, minBooked), maxBooked);
+    all.slice(0, booked).forEach(({ slot }) => { slot.booked = true; });
+  }
+
+  // The slots on show on `today` (a UTC date holding the event's local date), all open.
+  function windowDays(schedule, today, offset, daysAhead) {
+    const hours = schedule.hours || {};
+    const days = [];
+    for (let i = 1; i <= daysAhead; i += 1) {
+      const date = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + i));
+      const weekday = date.getUTCDay();
+      const ranges = hours[DAY_KEYS[weekday]] || (weekday >= 1 && weekday <= 5 ? hours.weekdays : null) || [];
+      if (!ranges.length) continue;
+      const ymd = `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}`;
+      days.push({
+        daysAway: i,
+        label: `${DAY_NAMES[weekday]} ${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]}`,
+        slots: ranges.map((range) => {
+          const [start, end] = range.split("-").map((t) => t.trim());
+          return { value: `${ymd}T${start}:00${offset}`, label: formatRange(start, end), booked: false };
+        }),
+      });
+    }
+    return days;
+  }
+
+  function scheduleDays(schedule) {
+    const offset = /^[+-]\d{2}:\d{2}$/.test(schedule.utc_offset || "") ? schedule.utc_offset : "+00:00";
+    const offsetMinutes = (offset[0] === "-" ? -1 : 1) * (Number(offset.slice(1, 3)) * 60 + Number(offset.slice(4)));
+    // "Now" shifted into the event's time zone, read back with the UTC getters.
+    const now = new Date(Date.now() + offsetMinutes * 60000);
+    const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const daysAhead = schedule.days_ahead || 7;
+
+    // A slot is booked if it was booked on any earlier day it was on show, so
+    // the minimum-booked top-up can never make a slot look free again later.
+    const booked = new Set();
+    for (let back = daysAhead - 1; back >= 0; back -= 1) {
+      const past = new Date(today.getTime() - back * 864e5);
+      const view = windowDays(schedule, past, offset, daysAhead);
+      markBooked(view, schedule.blocked, daysAhead);
+      view.forEach((day) => day.slots.forEach((slot) => { if (slot.booked) booked.add(slot.value); }));
+    }
+
+    const days = windowDays(schedule, today, offset, daysAhead);
+    days.forEach((day) => day.slots.forEach((slot) => { slot.booked = booked.has(slot.value); }));
+    return days;
+  }
+
+  function renderSchedule(group) {
+    const container = $("[data-schedule-slots]", group);
+    let schedule;
+    try {
+      schedule = JSON.parse(group.dataset.schedule);
+    } catch {
+      return;
+    }
+    const required = group.hasAttribute("data-required");
+    container.replaceChildren(...scheduleDays(schedule).map((day) => {
+      const row = document.createElement("div");
+      row.className = "grid gap-2";
+      const heading = document.createElement("p");
+      heading.className = "text-[11px] font-semibold tracking-[.12em] text-muted uppercase";
+      heading.textContent = day.label;
+      const grid = document.createElement("div");
+      grid.className = "grid grid-cols-2 gap-3";
+      grid.append(...day.slots.map((slot) => {
+        const label = document.createElement("label");
+        label.className = `group relative block min-w-0 ${slot.booked ? "cursor-not-allowed" : "cursor-pointer"}`;
+        const input = document.createElement("input");
+        Object.assign(input, { className: "peer sr-only", type: "radio", name: group.dataset.choiceGroup, value: slot.value, required, disabled: slot.booked });
+        input.setAttribute("aria-label", `${day.label}, ${slot.label}${slot.booked ? ", already booked" : ""}`);
+        const face = document.createElement("span");
+        face.className = "flex w-full flex-col items-center justify-center gap-0.5 border border-field bg-paper/60 px-2 py-[13px] text-center text-[14px] font-semibold tracking-[.03em] text-ink transition-colors hover:border-primary peer-checked:border-primary peer-checked:bg-primary peer-checked:text-on-dark peer-focus-visible:outline-2 peer-focus-visible:outline-offset-4 peer-focus-visible:outline-accent peer-disabled:border-line peer-disabled:bg-line/50 peer-disabled:text-muted peer-disabled:hover:border-line";
+        const time = document.createElement("span");
+        time.textContent = slot.label;
+        // Every slot gets a status line (Booked / Available / Selected) so all buttons are the same height.
+        const tag = document.createElement("span");
+        tag.className = "text-[9px] font-bold tracking-[.16em] uppercase";
+        tag.setAttribute("aria-hidden", "true"); // the radio's aria-label already says whether it's booked
+        if (slot.booked) {
+          time.className = "line-through decoration-1";
+          tag.textContent = "Booked";
+        } else {
+          const available = document.createElement("span");
+          available.className = "text-accent group-has-checked:hidden";
+          available.textContent = "Available";
+          const selected = document.createElement("span");
+          selected.className = "hidden text-highlight group-has-checked:inline";
+          selected.textContent = "Selected";
+          tag.append(available, selected);
+        }
+        face.append(time, tag);
+        label.append(input, face);
+        return label;
+      }));
+      row.append(heading, grid);
+      return row;
+    }));
+  }
+
   // --------------------------------------------------------- form RSVP
   // Sends { <field name>: value, ..., requestId } to the submissions endpoint.
   function initFormRsvp(form) {
+    $$("[data-schedule]", form).forEach(renderSchedule);
     const message = $("#rsvp-message");
     const submitButton = $("#submit");
     // Text-like controls plus button groups (type: choice), in page order.
@@ -343,7 +506,9 @@
     const problem = (field) => {
       if (field.dataset.choiceGroup) {
         const required = field.hasAttribute("data-required");
-        return required && !$("input:checked", field) ? `Please choose ${field.dataset.label.toLowerCase()}.` : "";
+        const label = field.dataset.label.toLowerCase();
+        const ask = label.startsWith("choose") || label.startsWith("pick") ? label : `choose ${label}`;
+        return required && !$("input:checked", field) ? `Please ${ask}.` : "";
       }
       const value = field.value.trim();
       const label = $(`label[for="${field.id}"]`)?.firstChild?.textContent.trim() || field.name;
@@ -359,7 +524,7 @@
         const error = problem(field);
         if (error) {
           message.textContent = error;
-          return (field.dataset.choiceGroup ? $("input", field) : field).focus();
+          return (field.dataset.choiceGroup ? $("input:not(:disabled)", field) : field).focus();
         }
       }
 

@@ -17,18 +17,26 @@
       <fieldset class="grid min-w-0 gap-2 p-0">
         <legend class="field-label mb-2">{{ f.label }}</legend>
         <div class="grid grid-cols-2 gap-3">
-          <label class="field-label text-[11px] font-semibold text-muted" for="{{ field_id }}-first">{{ f.first_label | default: "First name" }}
+          <label class="field-label min-w-0 text-[11px] font-semibold text-muted" for="{{ field_id }}-first">{{ f.first_label | default: "First name" }}
             <input class="field-input" id="{{ field_id }}-first" type="text" maxlength="80" autocomplete="given-name" data-join="{{ f.name }}"{% if f.greeting %} data-greeting-source{% endif %} placeholder="{{ f.first_placeholder | default: 'First name' | escape }}"{% if f.required %} required{% endif %}>
           </label>
-          <label class="field-label text-[11px] font-semibold text-muted" for="{{ field_id }}-last">{{ f.last_label | default: "Last name" }}
+          <label class="field-label min-w-0 text-[11px] font-semibold text-muted" for="{{ field_id }}-last">{{ f.last_label | default: "Last name" }}
             <input class="field-input" id="{{ field_id }}-last" type="text" maxlength="80" autocomplete="family-name" data-join="{{ f.name }}" placeholder="{{ f.last_placeholder | default: 'Last name' | escape }}"{% if f.required %} required{% endif %}>
           </label>
         </div>
       </fieldset>
       {% elsif f.type == 'choice' %}
-      {%- comment -%} One visible button per option; picking one deselects the rest (radio group). {%- endcomment -%}
-      <fieldset class="grid min-w-0 gap-2 p-0" id="{{ field_id }}" data-choice-group="{{ f.name }}" data-label="{{ f.label | escape }}"{% if f.required %} data-required{% endif %}>
+      {%- comment -%}
+        One visible button per option; picking one deselects the rest (radio group).
+        With `schedule`, invitation.js builds the buttons in the browser from today's date instead.
+      {%- endcomment -%}
+      <fieldset class="mt-4 grid min-w-0 gap-2 p-0" id="{{ field_id }}" data-choice-group="{{ f.name }}" data-label="{{ f.label | escape }}"{% if f.required %} data-required{% endif %}{% if f.schedule %} data-schedule="{{ f.schedule | jsonify | escape }}"{% endif %}>
         <legend class="field-label mb-2">{{ f.label }}</legend>
+        {% if f.schedule %}
+        <div class="grid gap-5" data-schedule-slots aria-live="polite">
+          <p class="text-[13px] text-muted">Loading available times…</p>
+        </div>
+        {% else %}
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {% for o in f.options %}
           <label class="relative block min-w-0 cursor-pointer">
@@ -37,6 +45,7 @@
           </label>
           {% endfor %}
         </div>
+        {% endif %}
       </fieldset>
       {% else %}
       <label class="field-label" for="{{ field_id }}">
