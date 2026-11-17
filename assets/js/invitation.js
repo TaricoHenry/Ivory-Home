@@ -41,10 +41,16 @@
     window.location.href = url.toString();
   }
 
-  // ------------------------------------------------- confirmation email
-  // POSTs one EmailMessage to the notifications service (backend.notifications).
-  // Best effort: a failed email is logged, never shown to the guest, because
-  // their submission has already been saved.
+  // ------------------------------------------------------------- emails
+  // Each submission POSTs EmailMessages to the notifications service
+  // (backend.notifications):
+  //   1. notification_email → the host's inbox (Reply-To: the guest). This is
+  //      the record of the submission, so if it fails the guest sees an error.
+  //   2. guest_email → the address the guest entered (Reply-To: the host).
+  //      Best effort: a failure is logged and the guest still moves on.
+  const EMAIL_PATH = "/v1/messages/email";
+  const emailEnabled = () => Boolean(config.notifications?.api_base && config.notifications?.api_key && config.notificationEmail?.to);
+
   const escapeHtml = (text) => String(text ?? "").replace(/[&<>"']/g, (ch) => (
     { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]
   ));
@@ -80,15 +86,16 @@
     ].filter(Boolean).join("\n\n");
   }
 
+  // email: a notification_email / guest_email template from the config.
+  // to: an address or { email, name }. kind: tags the idempotency key so each
+  // email of one submission is sent once, however often the guest retries.
   // values: { field name: display text }, rows: [{ label, value }] for the details table.
-  async function sendConfirmationEmail({ to, name, values, rows, reference }) {
-    const service = config.notifications || {};
-    const email = config.confirmationEmail;
-    if (!service.api_base || !service.api_key || !email || !to) return;
-
-    const filled = { ...values, first_name: (name || "").split(/\s+/)[0] || "there" };
+  // Throws a guest-friendly error if the service doesn't accept the email.
+  async function sendEmail(email, { kind, to, replyTo, name, values, rows, reference }) {
+    const service = config.notifications;
+    const filled = { ...values, first_name: (name || "").split(/\s+/)[0] || "" };
     const message = {
-      to: name ? { email: to, name: name.slice(0, 256) } : to,
+      to,
       subject: fillTemplate(email.subject, filled).slice(0, 998),
       html: buildEmailHtml(email, filled, rows),
       text: buildEmailText(email, filled, rows),
@@ -97,27 +104,29 @@
     const preheader = fillTemplate(email.preheader, filled);
     if (preheader) message.preheader = preheader.slice(0, 255);
     if (email.from_name) message.fromName = email.from_name.slice(0, 100);
-    if (email.reply_to) message.replyTo = email.reply_to;
+    if (replyTo) message.replyTo = replyTo;
 
+    let response;
     try {
-      const response = await fetch(`${service.api_base}${service.email_path || "/v1/messages/email"}`, {
+      response = await fetch(`${service.api_base.replace(/\/$/, "")}${EMAIL_PATH}`, {
         method: "POST",
         credentials: "omit",
-        keepalive: true, // let it finish even as we navigate to the thank-you page
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
           "x-api-key": service.api_key,
-          "Idempotency-Key": `email-${reference}`, // a retried submit won't send twice
+          "Idempotency-Key": `${kind}-email-${reference}`, // a retried submit won't send twice
         },
         body: JSON.stringify(message),
       });
-      if (!response.ok) {
-        const result = await response.json().catch(() => ({}));
-        console.error("Confirmation email was not accepted:", response.status, result.error || result);
-      }
     } catch (error) {
-      console.error("Unable to send confirmation email:", error);
+      console.error("Unable to reach the email service:", error);
+      throw new Error("We couldn’t send your request. Please check your connection and try again.");
+    }
+    if (!response.ok) {
+      const result = await response.json().catch(() => ({}));
+      console.error("Email was not accepted:", response.status, result.error || result);
+      throw new Error("We couldn’t send your request. Please try again in a moment.");
     }
   }
 
@@ -647,16 +656,30 @@
       submitButton.disabled = true;
       message.textContent = "Submitting…";
       try {
-        await api("submissions", { method: "POST", body: { ...body, requestId: pending.requestId } });
-        const requestId = pending.requestId;
+        // Either step can be configured off; at least one must be on.
+        if (!endpoints.submissions && !emailEnabled()) throw new Error("This form isn’t set up to send yet.");
+        if (endpoints.submissions) {
+          await api("submissions", { method: "POST", body: { ...body, requestId: pending.requestId } });
+        }
+        if (emailEnabled()) {
+          const guestEmail = body[$('input[type="email"]', form)?.name];
+          const shared = { name: body.name, ...emailDetails(body), reference: pending.requestId };
+          await sendEmail(config.notificationEmail, {
+            ...shared,
+            kind: "host",
+            to: config.notificationEmail.to,
+            replyTo: guestEmail,
+          });
+          if (config.guestEmail && guestEmail) {
+            await sendEmail(config.guestEmail, {
+              ...shared,
+              kind: "guest",
+              to: body.name ? { email: guestEmail, name: body.name.slice(0, 256) } : guestEmail,
+              replyTo: config.guestEmail.reply_to || config.notificationEmail.to,
+            }).catch((error) => console.error("Guest confirmation email failed:", error));
+          }
+        }
         pending = null;
-        message.textContent = "Sending your confirmation…";
-        await sendConfirmationEmail({
-          to: body[$('input[type="email"]', form)?.name],
-          name: body.name,
-          ...emailDetails(body),
-          reference: requestId,
-        });
         goToThankYou();
       } catch (error) {
         console.error("Unable to submit form:", error);

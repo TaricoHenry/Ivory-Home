@@ -134,23 +134,31 @@ thank_you:
   subtitle: Check your email and WhatsApp.
 
 # --- Backend --------------------------------------------------------------
+# No database: each booking just sends one email to Ivory's inbox through the
+# notifications service (POST {api_base}/v1/messages/email).
 backend:
-  api_base: https://us-central1-ivory-demo.cloudfunctions.net/api/v1/   # TODO: real Functions URL
-  endpoints:
-    submissions: demo-requests   # POST { name, email, whatsapp, timeslot, requestId }
-  # Confirmation email, sent from the browser after a successful submission.
-  # NOTE: this key ships in the public page source.
   notifications:
     api_base: https://ivory-notifications-prod.ivory-core-dev.workers.dev
-    email_path: /v1/messages/email
-    api_key: ivk_prod_6QFdEDhaUBgwyqJVnbHmNnKQ7Rig4uPI                  # x-api-key; leave empty to turn emails off
+    api_key: ivk_prod_6QFdEDhaUBgwyqJVnbHmNnKQ7Rig4uPI   # x-api-key — ships in the public page source
 
-# Sent to the address in the form's `email` field. {first_name} and any
-# field name in braces (e.g. {timeslot}) are filled in from the submission.
-confirmation_email:
+# The email each booking sends. Reply-To is the guest's email, so replying
+# reaches them. {first_name} and any field name in braces ({name}, {email},
+# {whatsapp}, {timeslot}) are filled in from the form.
+notification_email:
+  to: ivorygroup.gy@gmail.com
   from_name: Ivory Invites
-  subject: Your Ivory meeting is booked
-  preheader: "{timeslot}"
+  subject: "New demo booking: {name} — {timeslot}"
+  preheader: "{name} booked a virtual walkthrough"
+  heading: New demo booking
+  body: "{name} booked a virtual walkthrough. Reply to this email to reach them."
+
+# Confirmation sent to the address the guest entered, after the email above
+# succeeds. Reply-To is the inbox above (or set reply_to here). Same {fields}.
+# Delete this block to stop guest emails.
+guest_email:
+  from_name: Ivory Invites
+  subject: "You’re booked: {timeslot}"
+  preheader: Your Ivory virtual walkthrough is confirmed
   heading: Hi {first_name},
-  body: Thanks for booking a virtual walkthrough of Ivory invitations. Here are your details — we’ll be in touch on WhatsApp with the meeting link.
+  body: Thanks for booking a virtual walkthrough of Ivory invitations. Here are your details — we’ll send the meeting link on WhatsApp before your slot. Need to change something? Just reply to this email.
   sign_off: The Ivory team

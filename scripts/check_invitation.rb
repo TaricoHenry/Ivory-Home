@@ -27,7 +27,7 @@ require_field = ->(*keys) { errors << "missing #{keys.join('.')}" unless present
 
 # Required basics
 [%w[id], %w[name], %w[host name], %w[site url], %w[site description], %w[datetime],
- %w[features rsvp], %w[sections], %w[backend api_base]].each { |k| require_field.(*k) }
+ %w[features rsvp], %w[sections]].each { |k| require_field.(*k) }
 
 id = dig.("id").to_s
 errors << "id must be lowercase-hyphenated (got #{id.inspect})" unless id.empty? || id.match?(/\A[a-z0-9]+(-[a-z0-9]+)*\z/)
@@ -55,7 +55,21 @@ endpoints = dig.("backend", "endpoints") || {}
 needs = []
 needs << "registrations" if rsvp == "open"
 needs += %w[token_status token_details token_reply] if rsvp == "personal"
-needs << "submissions" if rsvp == "form"
+# A form posts to `submissions`, sends a notification email, or both.
+notify = dig.("backend", "notifications") || {}
+email_on = present.(notify["api_base"]) && present.(notify["api_key"]) && present.(dig.("notification_email", "to"))
+if present.(notify["api_base"]) || present.(dig.("notification_email"))
+  errors << "backend.notifications.api_base must start with https://" unless notify["api_base"].to_s.start_with?("https://")
+  errors << "notification_email.to is required when emails are configured" unless present.(dig.("notification_email", "to"))
+  errors << "notification_email.subject is required when emails are configured" unless present.(dig.("notification_email", "subject"))
+  warnings << "backend.notifications.api_key is empty, so no emails will be sent" unless present.(notify["api_key"])
+end
+needs << "submissions" if rsvp == "form" && !email_on
+if present.(dig.("guest_email"))
+  errors << "guest_email.subject is required" unless present.(dig.("guest_email", "subject"))
+  errors << "guest_email needs notification_email.to and backend.notifications.api_base (it is sent after that email)" unless present.(dig.("notification_email", "to")) && present.(notify["api_base"])
+  warnings << "guest_email is set but the form has no email field to send it to" if rsvp == "form" && !(dig.("rsvp", "fields") || []).any? { |f| f["type"] == "email" }
+end
 needs << "food_items" if features["contributions"]
 
 # Form fields
@@ -112,6 +126,7 @@ if rsvp == "form"
 end
 needs << "gallery_photos" if features["gallery"]
 needs.each { |name| errors << "backend.endpoints.#{name} is required by the enabled features" unless present.(endpoints[name]) }
+errors << "missing backend.api_base (needed by backend.endpoints)" if (needs.any? || endpoints.any?) && api.empty?
 
 # Sections
 sections = dig.("sections") || []
