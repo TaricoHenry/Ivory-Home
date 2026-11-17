@@ -11,6 +11,8 @@
     apiBase: {{ e.backend.api_base | jsonify }},
     endpoints: {{ e.backend.endpoints | jsonify }},
     rsvp: {{ e.rsvp | jsonify }},
+    notifications: {{ e.backend.notifications | jsonify }},
+    confirmationEmail: {{ e.confirmation_email | jsonify }},
     thankYouUrl: {{ '/invitations/' | append: page.invitation | append: '/thank-you/' | relative_url | jsonify }}
   };
 </script>

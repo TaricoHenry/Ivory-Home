@@ -41,6 +41,86 @@
     window.location.href = url.toString();
   }
 
+  // ------------------------------------------------- confirmation email
+  // POSTs one EmailMessage to the notifications service (backend.notifications).
+  // Best effort: a failed email is logged, never shown to the guest, because
+  // their submission has already been saved.
+  const escapeHtml = (text) => String(text ?? "").replace(/[&<>"']/g, (ch) => (
+    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]
+  ));
+
+  // "Hi {first_name}" → "Hi Jane". Unknown keys are left blank.
+  const fillTemplate = (text, values) => String(text || "").replace(/\{(\w+)\}/g, (_, key) => values[key] ?? "");
+
+  function buildEmailHtml(email, values, rows) {
+    const p = (text) => `<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2b2416">${escapeHtml(text)}</p>`;
+    const table = rows.map(({ label, value }) => `
+          <tr>
+            <td style="padding:8px 16px 8px 0;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#7d7460;vertical-align:top;white-space:nowrap">${escapeHtml(label)}</td>
+            <td style="padding:8px 0;font-size:15px;color:#2b2416">${escapeHtml(value)}</td>
+          </tr>`).join("");
+    return `<!doctype html>
+<html><body style="margin:0;padding:24px;background:#ffffff;font-family:Georgia,'Times New Roman',serif">
+  <div style="max-width:560px;margin:0 auto">
+    ${email.heading ? `<h1 style="margin:0 0 16px;font-size:24px;font-weight:normal;color:#2b2416">${escapeHtml(fillTemplate(email.heading, values))}</h1>` : ""}
+    ${email.body ? p(fillTemplate(email.body, values)) : ""}
+    ${rows.length ? `<table role="presentation" style="border-collapse:collapse;margin:8px 0 24px;border-top:1px solid #ece3cf;width:100%">${table}
+    </table>` : ""}
+    ${email.sign_off ? p(fillTemplate(email.sign_off, values)) : ""}
+  </div>
+</body></html>`;
+  }
+
+  function buildEmailText(email, values, rows) {
+    return [
+      fillTemplate(email.heading, values),
+      fillTemplate(email.body, values),
+      rows.map(({ label, value }) => `${label}: ${value}`).join("\n"),
+      fillTemplate(email.sign_off, values),
+    ].filter(Boolean).join("\n\n");
+  }
+
+  // values: { field name: display text }, rows: [{ label, value }] for the details table.
+  async function sendConfirmationEmail({ to, name, values, rows, reference }) {
+    const service = config.notifications || {};
+    const email = config.confirmationEmail;
+    if (!service.api_base || !service.api_key || !email || !to) return;
+
+    const filled = { ...values, first_name: (name || "").split(/\s+/)[0] || "there" };
+    const message = {
+      to: name ? { email: to, name: name.slice(0, 256) } : to,
+      subject: fillTemplate(email.subject, filled).slice(0, 998),
+      html: buildEmailHtml(email, filled, rows),
+      text: buildEmailText(email, filled, rows),
+      reference: String(reference).slice(0, 256),
+    };
+    const preheader = fillTemplate(email.preheader, filled);
+    if (preheader) message.preheader = preheader.slice(0, 255);
+    if (email.from_name) message.fromName = email.from_name.slice(0, 100);
+    if (email.reply_to) message.replyTo = email.reply_to;
+
+    try {
+      const response = await fetch(`${service.api_base}${service.email_path || "/v1/messages/email"}`, {
+        method: "POST",
+        credentials: "omit",
+        keepalive: true, // let it finish even as we navigate to the thank-you page
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "x-api-key": service.api_key,
+          "Idempotency-Key": `email-${reference}`, // a retried submit won't send twice
+        },
+        body: JSON.stringify(message),
+      });
+      if (!response.ok) {
+        const result = await response.json().catch(() => ({}));
+        console.error("Confirmation email was not accepted:", response.status, result.error || result);
+      }
+    } catch (error) {
+      console.error("Unable to send confirmation email:", error);
+    }
+  }
+
   // Links marked data-keep-token carry ?token= across pages.
   if (token) {
     $$("a[data-keep-token]").forEach((link) => {
@@ -518,6 +598,32 @@
       return "";
     };
 
+    // What the guest saw, for the email: each field's label and readable value
+    // (e.g. "Wed 18 Nov, 5:30–6:30 PM" rather than the slot's ISO timestamp).
+    const emailDetails = (body) => {
+      const values = { ...body };
+      const rows = [];
+      const seen = new Set();
+      for (const field of controls) {
+        const key = field.dataset.choiceGroup || field.dataset.join || field.name;
+        if (!key || seen.has(key) || !body[key]) continue;
+        seen.add(key);
+        let label = field.dataset.label || $(`label[for="${field.id}"]`)?.firstChild?.textContent.trim() || key;
+        let value = body[key];
+        if (field.dataset.choiceGroup) {
+          const checked = $("input:checked", field);
+          value = checked?.getAttribute("aria-label")?.replace(/, already booked$/, "") || checked?.nextElementSibling?.textContent.trim() || value;
+        } else if (field.dataset.join) {
+          label = field.closest("fieldset")?.querySelector("legend")?.textContent.trim() || label;
+        } else if (field.tagName === "SELECT") {
+          value = field.selectedOptions[0]?.textContent.trim() || value;
+        }
+        values[key] = value;
+        rows.push({ label, value });
+      }
+      return { values, rows };
+    };
+
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       for (const field of controls) {
@@ -542,7 +648,15 @@
       message.textContent = "Submitting…";
       try {
         await api("submissions", { method: "POST", body: { ...body, requestId: pending.requestId } });
+        const requestId = pending.requestId;
         pending = null;
+        message.textContent = "Sending your confirmation…";
+        await sendConfirmationEmail({
+          to: body[$('input[type="email"]', form)?.name],
+          name: body.name,
+          ...emailDetails(body),
+          reference: requestId,
+        });
         goToThankYou();
       } catch (error) {
         console.error("Unable to submit form:", error);

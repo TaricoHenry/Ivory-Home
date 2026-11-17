@@ -138,3 +138,19 @@ backend:
   api_base: https://us-central1-ivory-demo.cloudfunctions.net/api/v1/   # TODO: real Functions URL
   endpoints:
     submissions: demo-requests   # POST { name, email, whatsapp, timeslot, requestId }
+  # Confirmation email, sent from the browser after a successful submission.
+  # NOTE: this key ships in the public page source.
+  notifications:
+    api_base: https://ivory-notifications-prod.ivory-core-dev.workers.dev
+    email_path: /v1/messages/email
+    api_key: ivk_prod_6QFdEDhaUBgwyqJVnbHmNnKQ7Rig4uPI                  # x-api-key; leave empty to turn emails off
+
+# Sent to the address in the form's `email` field. {first_name} and any
+# field name in braces (e.g. {timeslot}) are filled in from the submission.
+confirmation_email:
+  from_name: Ivory Invites
+  subject: Your Ivory meeting is booked
+  preheader: "{timeslot}"
+  heading: Hi {first_name},
+  body: Thanks for booking a virtual walkthrough of Ivory invitations. Here are your details — we’ll be in touch on WhatsApp with the meeting link.
+  sign_off: The Ivory team
