@@ -6,74 +6,122 @@ description: Beautiful digital invitations for weddings, birthdays, conferences,
 
 <main>
   <!-- =========================================================
-       SECTION 1: HERO AND BACKGROUND CAROUSEL
+       SECTION 1: HERO — devices that animate on scroll
+       The section is several screens tall; the stage inside stays pinned
+       while assets/js/site.js (initHeroShowcase) moves the devices.
+       Images and timing: _data/showcase.yml
        ========================================================= -->
+  {%- assign show = site.data.showcase -%}
   <section
-    class="relative flex min-h-screen items-center justify-center overflow-hidden bg-charcoal"
+    class="hero-showcase relative bg-white"
+    style="--scroll-length: {{ show.scroll_length | default: 2.2 }}"
     aria-labelledby="hero-heading"
+    data-hero-showcase
   >
-    <div class="absolute inset-0" aria-hidden="true">
-      <div class="hero-carousel-track">
-        {% for copy in (1..2) %}
-          <div class="hero-carousel-set">
-            {% for image in site.data.hero_images %}
-              <figure class="hero-carousel-slide">
-                <img
-                  src="{{ image.src | relative_url }}"
-                  alt=""
-                  width="1200"
-                  height="900"
-                >
-              </figure>
-            {% endfor %}
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-
-    <!-- Improves contrast behind the centered logo. -->
-    <div
-      class="absolute inset-0 bg-black/45"
-      aria-hidden="true"
-    ></div>
-
-    <div
-      class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.65)_100%)]"
-      aria-hidden="true"
-    ></div>
-
-    <div class="relative z-10 mx-auto max-w-4xl px-6 text-center text-white">
-      <!-- Replace this text with an SVG or image logo later. -->
-      <a
-        href="#event-types"
-        class="inline-block rounded-full px-8 py-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-transparent"
-        aria-label="Explore our event invitation options"
-      >
-        <p class="mb-5 text-xs font-semibold uppercase tracking-[0.45em] text-white/75">
-          Digital Event Experiences
-        </p>
-
+    <div class="hero-stage sticky top-0 h-svh overflow-hidden">
+      <!-- Background: showcase.background in _data/showcase.yml, or plain white. -->
+      {% if show.background %}
         <img
-        id="hero-heading"
-        src="{{ '/assets/images/ivory-logo_white.svg' | relative_url }}"
-        alt="Ever After Events"
-        class="mx-auto h-auto w-100 sm:w-100 md:w-128 lg:w-[180rem]"
+          class="absolute inset-0 size-full object-cover"
+          src="{{ show.background | relative_url }}"
+          alt=""
+          aria-hidden="true"
+          fetchpriority="high"
         >
-      </a>
+      {% endif %}
 
-      <p class="mx-auto mt-6 max-w-xl text-base leading-7 text-white/75 sm:text-lg">
-        Thoughtfully designed digital invitations for celebrations,
-        gatherings and unforgettable moments.
-      </p>
+      <div class="hero-layout relative z-10 mx-auto h-full max-w-7xl px-6 md:px-10">
+        <!-- Start: intro text (left on desktop, top on phones). Fades out as you scroll. -->
+        <div class="hero-intro text-charcoal max-md:text-center" data-hero-intro>
+          <!-- Each .hero-heading-line slides up into view on load (input.css). -->
+          <h1 id="hero-heading" class="hero-heading m-0 font-display">
+            <span class="hero-heading-line"><span>Digital invites</span></span>
+            <span class="hero-heading-line"><span>for <em class="hero-heading-accent">your event,</em></span></span>
+            <span class="hero-heading-by">
+              <span class="hero-heading-rule" aria-hidden="true"></span>
+              done with
+              <img
+                src="{{ '/assets/images/ivory-logo_black.svg' | relative_url }}"
+                alt="Ivory"
+                width="911"
+                height="401"
+                class="hero-heading-logo"
+              ></span>
+          </h1>
 
-      <a
-        href="#event-types"
-        class="mt-10 inline-flex items-center gap-3 rounded-full border border-white/35 bg-white/10 px-7 py-3 text-sm font-semibold backdrop-blur-md transition hover:border-white hover:bg-white hover:text-charcoal focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-      >
-        Explore occasions
+          <p class="mt-6 max-w-md text-base leading-7 text-charcoal/70 sm:text-lg max-md:mx-auto">
+            Thoughtfully designed digital invitations for celebrations,
+            gatherings and unforgettable moments.
+          </p>
 
-        <span aria-hidden="true">↓</span>
-      </a>
+          <!-- Scrolls slowly to the end of the animation (site.js: data-hero-play). -->
+          <a
+            href="#hero-end"
+            class="mt-8 inline-flex items-center gap-3 rounded-full border border-charcoal/25 px-7 py-3 text-sm font-semibold text-charcoal transition hover:border-charcoal hover:bg-charcoal hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-charcoal"
+            data-hero-play
+          >
+            See how it works
+            <span aria-hidden="true">↓</span>
+          </a>
+        </div>
+
+        <!-- Start: laptop with the slanted phone in front of it. -->
+        <div class="hero-devices" aria-hidden="true">
+          <img
+            class="hero-laptop"
+            src="{{ show.laptop | relative_url }}"
+            alt=""
+            width="1484"
+            height="1176"
+            fetchpriority="high"
+            data-hero-laptop
+          >
+
+          <div class="hero-phone" data-hero-phone>
+            {% if show.phone_spin.frames > 0 %}
+              <img
+                class="hero-phone-frame"
+                src="{{ show.phone_spin.path | append: '001.' | append: show.phone_spin.ext | relative_url }}"
+                alt=""
+                data-frame-path="{{ show.phone_spin.path | relative_url }}"
+                data-frame-count="{{ show.phone_spin.frames }}"
+                data-frame-ext="{{ show.phone_spin.ext }}"
+              >
+            {% else %}
+              <!-- Stand-in until the rendered spin exists: a 3D flip that swaps
+                   images while the back is showing. -->
+              <div class="hero-phone-flip" data-hero-flip>
+                <img class="hero-phone-face" src="{{ show.phone_start | relative_url }}" alt="" data-face-start>
+                <img class="hero-phone-face" src="{{ show.phone_end | relative_url }}" alt="" data-face-end hidden>
+                <div class="hero-phone-back"></div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- End: where the phone lands (left on desktop) and the text beside it. -->
+        <div class="hero-phone-end" aria-hidden="true" data-hero-phone-end></div>
+
+        <div id="hero-end" class="hero-outro text-charcoal max-md:text-center" data-hero-outro>
+          <p class="mb-4 text-xs font-semibold uppercase tracking-[0.45em] text-[#8f7130]">
+            Made for their phone
+          </p>
+          <h2 class="font-display text-[clamp(30px,3.6vw,52px)] leading-[1.1]">
+            Opened in a tap, answered in seconds.
+          </h2>
+          <p class="mt-5 max-w-md text-base leading-7 text-charcoal/70 max-md:mx-auto">
+            Every Ivory invitation is designed for the screen your guests
+            actually use: details, directions and RSVP all in one place.
+          </p>
+          <a
+            href="#event-types"
+            class="mt-8 inline-flex items-center gap-3 rounded-full border border-gold bg-gold/15 px-7 py-3 text-sm font-semibold text-charcoal transition hover:bg-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-charcoal"
+          >
+            What are you celebrating?
+            <span aria-hidden="true">↓</span>
+          </a>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -116,6 +164,8 @@ description: Beautiful digital invitations for weddings, birthdays, conferences,
         style="background-image: url('{{ '/assets/images/wedding.jpg' | relative_url }}');"
         data-event-card
         data-event-type="Wedding"
+        data-contact-heading="Let’s celebrate your wedding."
+        data-enquiry="my wedding"
         data-selected="false"
         aria-pressed="false"
         >
@@ -157,6 +207,8 @@ description: Beautiful digital invitations for weddings, birthdays, conferences,
         style="background-image: url('{{ '/assets/images/birthday.jpg' | relative_url }}');"
         data-event-card
         data-event-type="Birthday"
+        data-contact-heading="Let’s celebrate your birthday."
+        data-enquiry="my birthday"
         data-selected="false"
         aria-pressed="false"
         >
@@ -198,6 +250,8 @@ description: Beautiful digital invitations for weddings, birthdays, conferences,
         style="background-image: url('{{ '/assets/images/conference.jpg' | relative_url }}');"
         data-event-card
         data-event-type="Any Occasion"
+        data-contact-heading="Let’s celebrate anything."
+        data-enquiry="my event"
         data-selected="false"
         aria-pressed="false"
         >
@@ -234,6 +288,87 @@ description: Beautiful digital invitations for weddings, birthdays, conferences,
       </div>
     </div>
   </section>
+  <!-- =========================================================
+       SECTION 3: CONTACT
+       ========================================================= -->
+  <section
+    id="contact"
+    class="relative flex min-h-[65vh] items-center justify-center overflow-hidden bg-charcoal px-6 py-24 text-center text-white"
+    aria-labelledby="contact-heading"
+  >
+    <div
+      class="absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gold/10 blur-3xl"
+      aria-hidden="true"
+    ></div>
+
+    <div class="relative z-10 mx-auto max-w-3xl">
+      <p class="mb-5 text-xs font-bold uppercase tracking-[0.4em] text-gold">
+        Start your invitation
+      </p>
+
+      <h2
+        id="contact-heading"
+        class="font-display text-5xl leading-tight sm:text-6xl md:text-7xl"
+        aria-live="polite"
+        data-contact-title
+      >
+        Let’s create something worth celebrating.
+      </h2>
+
+      <div
+        id="contact-menu"
+        class="group/contact relative mt-12 inline-block"
+        data-open="false"
+      >
+        <button
+          id="contact-button"
+          type="button"
+          class="inline-flex min-w-52 items-center justify-center rounded-full bg-white px-9 py-4 text-sm font-bold uppercase tracking-[0.2em] text-charcoal transition duration-300 hover:scale-105 hover:bg-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-charcoal"
+          aria-expanded="false"
+          aria-controls="contact-options"
+        >
+          Contact us
+        </button>
+
+        <div
+          id="contact-options"
+          class="invisible absolute left-1/2 top-full mt-3 flex -translate-x-1/2 items-center gap-3 opacity-0 transition duration-200 group-hover/contact:opacity-100 group-focus-within/contact:visible group-focus-within/contact:opacity-100 data-[open=true]:visible data-[open=true]:opacity-100"
+          role="menu"
+        >
+          <a
+            id="email-link"
+            href="mailto:sales@ivory-gy.com?subject=Digital%20invitation%20enquiry"
+            class="flex size-14 items-center justify-center rounded-full transition hover:scale-105 hover:border-gold hover:bg-gold hover:text-charcoal focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            role="menuitem"
+            aria-label="Email us"
+            title="Email us"
+          >
+            <img
+              src="{{ '/assets/images/social-email.svg' | relative_url }}"
+              alt="Email icon"
+              class="size-6"
+            >
+          </a>
+
+          <a
+            href="https://wa.me/5927069433?text=Hello%20Ivory%20Invitations%2C%20I%27d%20like%20to%20enquire%20about%20a%20digital%20invitation"
+            data-whatsapp-link
+            class="flex size-14 items-center justify-center rounded-full transition hover:scale-105 hover:border-[#25D366] hover:bg-[#25D366] hover:text-charcoal focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            role="menuitem"
+            aria-label="Contact us on WhatsApp"
+            title="WhatsApp"
+          >
+            <img
+              src="{{ '/assets/images/social-whatsapp.svg' | relative_url }}"
+              alt="WhatsApp icon"
+              class="size-6"
+            >
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- =========================================================
     FEATURES SECTION
      ========================================================= -->
@@ -409,82 +544,4 @@ description: Beautiful digital invitations for weddings, birthdays, conferences,
         </div>
     </div>
     </section>
-
-  <!-- =========================================================
-       SECTION 3: CONTACT
-       ========================================================= -->
-  <section
-    id="contact"
-    class="relative flex min-h-[65vh] items-center justify-center overflow-hidden bg-charcoal px-6 py-24 text-center text-white"
-    aria-labelledby="contact-heading"
-  >
-    <div
-      class="absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gold/10 blur-3xl"
-      aria-hidden="true"
-    ></div>
-
-    <div class="relative z-10 mx-auto max-w-3xl">
-      <p class="mb-5 text-xs font-bold uppercase tracking-[0.4em] text-gold">
-        Start your invitation
-      </p>
-
-      <h2
-        id="contact-heading"
-        class="font-display text-5xl leading-tight sm:text-6xl md:text-7xl"
-      >
-        Let’s create something worth celebrating.
-      </h2>
-
-      <div
-        id="contact-menu"
-        class="group/contact relative mt-12 inline-block"
-        data-open="false"
-      >
-        <button
-          id="contact-button"
-          type="button"
-          class="inline-flex min-w-52 items-center justify-center rounded-full bg-white px-9 py-4 text-sm font-bold uppercase tracking-[0.2em] text-charcoal transition duration-300 hover:scale-105 hover:bg-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-charcoal"
-          aria-expanded="false"
-          aria-controls="contact-options"
-        >
-          Contact us
-        </button>
-
-        <div
-          id="contact-options"
-          class="invisible absolute left-1/2 top-full mt-3 flex -translate-x-1/2 items-center gap-3 opacity-0 transition duration-200 group-hover/contact:opacity-100 group-focus-within/contact:visible group-focus-within/contact:opacity-100 data-[open=true]:visible data-[open=true]:opacity-100"
-          role="menu"
-        >
-          <a
-            id="email-link"
-            href="mailto:sales@ivory-gy.com?subject=Digital%20invitation%20enquiry"
-            class="flex size-14 items-center justify-center rounded-full transition hover:scale-105 hover:border-gold hover:bg-gold hover:text-charcoal focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-            role="menuitem"
-            aria-label="Email us"
-            title="Email us"
-          >
-            <img
-              src="{{ '/assets/images/social-email.svg' | relative_url }}"
-              alt="Email icon"
-              class="size-6"
-            >
-          </a>
-
-          <a
-            href="https://wa.me/5927069433?text=Hello%20Ivory%20Invitations%2C%20I%27d%20like%20to%20enquire%20about%20a%20digital%20invitation"
-            class="flex size-14 items-center justify-center rounded-full transition hover:scale-105 hover:border-[#25D366] hover:bg-[#25D366] hover:text-charcoal focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-            role="menuitem"
-            aria-label="Contact us on WhatsApp"
-            title="WhatsApp"
-          >
-            <img
-              src="{{ '/assets/images/social-whatsapp.svg' | relative_url }}"
-              alt="WhatsApp icon"
-              class="size-6"
-            >
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
 </main>

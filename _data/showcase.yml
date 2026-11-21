@@ -1,0 +1,18 @@
+# Home page hero: laptop + phone that animate as you scroll (index.html, assets/js/site.js).
+# Images are web copies made by: python3 scripts/prep_mockups.py
+
+background:          # e.g. /assets/images/home-hero-bg.jpg; empty = plain white
+laptop: /assets/images/mockup-laptop.webp
+phone_start: /assets/images/mockup-iphone-1.webp   # slanted phone, right side
+phone_end: /assets/images/mockup-iphone-2.webp     # front-facing phone, left side
+
+# Rendered spin. Until frames > 0, the phone does a 3D flip from phone_start
+# to phone_end instead. Once the renders are in assets/images/phone-spin/,
+# run the prep script, then set frames to how many there are.
+phone_spin:
+  frames: 121
+  path: /assets/images/phone-spin/   # files are 001.webp, 002.webp, ...
+  ext: webp
+
+# How many screen-heights the animation lasts (more = slower per scroll).
+scroll_length: 2.2
