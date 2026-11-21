@@ -76,6 +76,65 @@
     .hero-carousel-track { animation: none; }
   }
 
+  /* hero.background: gold — a soft metallic sheen instead of photos. */
+  .hero-gold {
+    background:
+      radial-gradient(ellipse at 30% 20%, color-mix(in srgb, var(--color-highlight) 55%, transparent) 0%, transparent 55%),
+      radial-gradient(ellipse at 80% 100%, color-mix(in srgb, var(--color-primary-deep) 70%, transparent) 0%, transparent 60%),
+      linear-gradient(160deg, var(--color-hero) 0%, var(--color-primary) 55%, var(--color-primary-deep) 100%);
+  }
+
+  .hero-texture {
+    background-repeat: repeat;
+    background-size: var(--texture-size, 900px) auto;
+    background-position: center top;
+  }
+  @media (max-width: 767px) {
+    .hero-texture { background-size: calc(var(--texture-size, 900px) * .6) auto; }
+  }
+
+  /* Hero circles (hero.circles in the event yml). The outer span is moved by JS on
+     scroll; the inner span carries the look and a slow idle float. */
+  .hero-circle {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: var(--size);
+    aspect-ratio: 1;
+    margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
+    will-change: transform;
+  }
+  .hero-circle > span {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    animation: hero-circle-float 14s ease-in-out var(--float-delay, 0s) infinite alternate;
+  }
+  /* Shades are lighter than the gold hero behind them so they read as raised coins. */
+  .hero-circle--solid > span {
+    background: radial-gradient(circle at 32% 28%,
+      color-mix(in srgb, var(--color-highlight) 60%, white) 0%,
+      var(--color-highlight) 30%,
+      var(--color-primary) 75%,
+      var(--color-primary-deep) 100%);
+    box-shadow: 0 .6vmax 1.6vmax color-mix(in srgb, var(--color-primary-deep) 55%, transparent);
+  }
+  .hero-circle--ring > span {
+    border: max(1.5px, .18vmax) solid color-mix(in srgb, var(--color-highlight) 75%, white);
+    opacity: .75;
+  }
+  /* Halftone disc: a dot grid clipped to a circle, fading out from one side. */
+  .hero-circle--dots > span {
+    background: radial-gradient(circle, color-mix(in srgb, var(--color-highlight) 70%, white) 0 32%, transparent 36%) 0 0 / 14% 14%;
+    -webkit-mask: radial-gradient(circle at 30% 30%, #000 0 35%, transparent 72%);
+            mask: radial-gradient(circle at 30% 30%, #000 0 35%, transparent 72%);
+    opacity: .85;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-circle > span { animation: none; }
+  }
+
   .btn-hero {
     border-color: var(--color-accent);
     background-color: var(--color-accent);
@@ -85,6 +144,16 @@
   .btn-hero:hover {
     border-color: var(--color-highlight);
     background-color: color-mix(in srgb, var(--color-accent) 85%, black);
+  }
+  /* On the plain gold hero the accent button disappears; use the deep gold instead. */
+  .hero--gold .btn-hero {
+    border-color: color-mix(in srgb, var(--color-highlight) 70%, transparent);
+    background-color: var(--color-primary-deep);
+    box-shadow: 0 .8rem 2rem color-mix(in srgb, var(--color-primary-deep) 45%, transparent);
+  }
+  .hero--gold .btn-hero:hover {
+    border-color: var(--color-highlight);
+    background-color: color-mix(in srgb, var(--color-primary-deep) 80%, black);
   }
 
   .btn-submit {
@@ -224,6 +293,11 @@ html[data-scroll-animations="ready"] [data-scroll-visible="true"] { opacity: 1; 
 @media (prefers-reduced-motion: reduce) {
   html[data-scroll-animations="ready"] [data-scroll-reveal] { opacity: 1; transform: none; transition: none; }
   .thank-you-credit { animation: none; }
+}
+
+@keyframes hero-circle-float {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(1.2vmax, -1.8vmax, 0) scale(1.04); }
 }
 
 @keyframes hero-carousel {

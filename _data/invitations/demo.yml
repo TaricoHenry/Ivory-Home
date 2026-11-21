@@ -59,10 +59,35 @@ sections:
 hero:
   align: center
   nav_bar: light                  # white bar across the top
-  carousel:                       # slowly scrolling photo strip behind the hero
-    - hero-wedding.jpg
-    - hero-birthday.jpg
-    - hero-conference.jpg
+  height: full                    # fill the whole screen (leave out for the usual 810px cap)
+  background: gold                # plain gold gradient, no photos (.hero-gold in invitation-input.css)
+  texture:                        # repeating pattern blended into the gold
+    image: black-flower-background-1800.jpg   # web-sized copy of black-flower-background.png
+    size: 900                     # width of one tile in px (60% of this on phones)
+    opacity: 0.4                  # 0 = invisible, 1 = full strength
+    blend: overlay                # overlay | soft-light | multiply
+  circles:                        # gold circles that drift apart as you scroll (assets/js/invitation.js)
+    # x / y: centre, as % of the hero. size: % of the screen's longer side.
+    # style: solid (polished gold) | ring (thin outline) | dots (halftone).
+    # speed: vertical travel per pixel scrolled (negative = up). drift: sideways (negative = left).
+    # spin: degrees turned per 100px scrolled.
+    - { x: 8,  y: 20, size: 9,   style: dots, speed: -0.45, drift: -0.18, spin: 6 }
+    - { x: 22, y: 9,  size: 2.5, style: ring, speed: -0.95, drift: -0.35, spin: 0 }
+    - { x: 31, y: 34, size: 4,   style: ring,  speed: -0.70, drift: -0.10, spin: 0 }
+    - { x: 17, y: 52, size: 6,   style: dots,  speed: -0.55, drift: -0.40, spin: 14 }
+    - { x: 4,  y: 72, size: 3,   style: ring, speed: -1.05, drift: -0.08, spin: 0 }
+    - { x: 13, y: 88, size: 7,   style: ring,  speed: -0.35, drift: -0.22, spin: 0 }
+    - { x: 33, y: 80, size: 2,   style: ring, speed: -1.25, drift: 0.12,  spin: 0 }
+    - { x: 46, y: 95, size: 5,   style: dots,  speed: -0.80, drift: -0.05, spin: -10 }
+    - { x: 52, y: 5,  size: 3.5, style: ring,  speed: -0.50, drift: 0.15,  spin: 0 }
+    - { x: 67, y: 14, size: 2,   style: dots, speed: -1.15, drift: 0.30,  spin: 0 }
+    - { x: 84, y: 12, size: 6.5, style: dots,  speed: -0.85, drift: 0.22,  spin: -12 }
+    - { x: 94, y: 33, size: 3,   style: ring, speed: -0.60, drift: 0.45,  spin: 0 }
+    - { x: 73, y: 46, size: 4.5, style: ring,  speed: -0.95, drift: 0.28,  spin: 0 }
+    - { x: 89, y: 62, size: 10,  style: dots, speed: -0.30, drift: 0.12,  spin: 0 }
+    - { x: 71, y: 82, size: 2.5, style: ring, speed: -1.30, drift: -0.12, spin: 0 }
+    - { x: 82, y: 92, size: 5,   style: dots,  speed: -0.65, drift: 0.38,  spin: 9 }
+    - { x: 97, y: 85, size: 3.5, style: ring,  speed: -0.75, drift: 0.05,  spin: 0 }
   logo: ivory-logo_white.svg      # shown above the title
   logo_alt: Ivory Invites
   title_html: Virtual Meeting

@@ -154,6 +154,7 @@ image_refs = {
   "host.nav_logo" => dig.("host", "nav_logo"),
   "hero.image" => dig.("hero", "image"),
   "hero.logo" => dig.("hero", "logo"),
+  "hero.texture.image" => dig.("hero", "texture", "image"),
   "invitation.background.image" => dig.("invitation", "background", "image"),
   "invitation.greeting_decor" => dig.("invitation", "greeting_decor"),
   "theme.pattern.image" => dig.("theme", "pattern", "image"),

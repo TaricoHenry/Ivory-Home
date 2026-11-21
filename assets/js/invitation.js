@@ -165,6 +165,34 @@
     initScrollReveals();
   }
 
+  // ------------------------------------------------------- hero circles
+  // Each circle moves by its own speed / drift / spin as the page scrolls,
+  // so they fly apart at different rates. Only updates while the hero is on screen.
+  function initHeroCircles() {
+    const layer = $("[data-hero-circles]");
+    if (!layer || prefersReducedMotion) return;
+    const circles = $$(".hero-circle", layer).map((el) => ({
+      el,
+      speed: parseFloat(el.dataset.speed) || 0,
+      drift: parseFloat(el.dataset.drift) || 0,
+      spin: parseFloat(el.dataset.spin) || 0,
+    }));
+    const hero = layer.parentElement;
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+      const y = Math.max(0, window.scrollY);
+      if (y > hero.offsetHeight * 1.2) return;
+      circles.forEach(({ el, speed, drift, spin }) => {
+        el.style.transform = `translate3d(${(drift * y).toFixed(1)}px, ${(speed * y).toFixed(1)}px, 0) rotate(${(spin * y / 100).toFixed(1)}deg)`;
+      });
+    };
+    window.addEventListener("scroll", () => { if (!frame) frame = requestAnimationFrame(update); }, { passive: true });
+    update();
+  }
+  initHeroCircles();
+
   // ------------------------------------------------------- smooth scroll
   let scrollFrame = 0;
   const cancelScroll = () => {

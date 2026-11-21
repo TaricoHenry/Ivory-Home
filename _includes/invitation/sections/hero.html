@@ -1,6 +1,8 @@
 {%- assign e = site.data.invitations[page.invitation] -%}
 {%- assign h = e.hero -%}
-<section class="relative min-h-[min(810px,94svh)] overflow-hidden bg-hero text-on-dark max-md:min-h-[min(760px,92svh)]" aria-labelledby="hero-title">
+{%- comment -%} hero.height: full fills the screen; otherwise capped at 810px (760px on phones). {%- endcomment -%}
+{%- if h.height == "full" -%}{%- assign hero_h = "min-h-svh" -%}{%- else -%}{%- assign hero_h = "min-h-[min(810px,94svh)] max-md:min-h-[min(760px,92svh)]" -%}{%- endif -%}
+<section class="{% if h.background == 'gold' and h.carousel == nil and h.image == nil %}hero--gold {% endif %}relative {{ hero_h }} overflow-hidden bg-hero text-on-dark" aria-labelledby="hero-title">
   {% if h.image %}
   <img
     class="absolute inset-0 size-full object-cover"
@@ -24,8 +26,23 @@
     </div>
   </div>
   <div class="hero-carousel-shade pointer-events-none absolute inset-0"></div>
+  {% elsif h.background == 'gold' %}
+  <div class="hero-gold pointer-events-none absolute inset-0"></div>
+  {% if h.texture.image %}
+  {%- comment -%} hero.texture: a repeating image blended into the gold, so dark patterns read as embossed gold. {%- endcomment -%}
+  <div class="hero-texture pointer-events-none absolute inset-0" style="background-image: url('{{ '/assets/images/' | append: h.texture.image | relative_url }}'); --texture-size: {{ h.texture.size | default: 900 }}px; opacity: {{ h.texture.opacity | default: 0.6 }}; mix-blend-mode: {{ h.texture.blend | default: 'overlay' }}"></div>
+  {% endif %}
   {% else %}
   <div class="hero-overlay pointer-events-none absolute inset-0"></div>
+  {% endif %}
+
+  {% if h.circles and h.circles.size > 0 %}
+  {%- comment -%} Gold circles: placed here, moved on scroll by initHeroCircles() in invitation.js. {%- endcomment -%}
+  <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true" data-hero-circles>
+    {% for c in h.circles %}
+    <span class="hero-circle hero-circle--{{ c.style | default: 'solid' }}" style="--x: {{ c.x }}%; --y: {{ c.y }}%; --size: {{ c.size }}vmax; --float-delay: -{{ forloop.index0 | times: 1.7 }}s" data-speed="{{ c.speed | default: -0.5 }}" data-drift="{{ c.drift | default: 0 }}" data-spin="{{ c.spin | default: 0 }}"><span></span></span>
+    {% endfor %}
+  </div>
   {% endif %}
 
   {%- assign light_bar = false -%}{%- if h.nav_bar == 'light' -%}{%- assign light_bar = true -%}{%- endif -%}
@@ -43,15 +60,15 @@
     {% endif %}
   </div>
 
-  <div class="relative z-10 mx-auto flex min-h-[min(810px,94svh)] max-w-[1240px] flex-col {% if h.align == 'center' %}items-center text-center{% else %}items-start{% endif %} justify-center px-[8vw] pt-[120px] pb-[110px] max-md:min-h-[min(760px,92svh)] max-md:px-[25px] max-md:pt-[125px] max-md:pb-[105px]">
-    {% if h.logo %}<img class="mb-8 h-auto w-[clamp(150px,24vw,280px)] max-md:mb-6" src="{{ '/assets/images/' | append: h.logo | relative_url }}" alt="{{ h.logo_alt | default: e.host.name | escape }}">{% endif %}
-    {% if h.eyebrow %}<p class="hero-shine mb-4 font-sans text-[25px] leading-[1.5] font-semibold tracking-[.2em] uppercase max-md:text-[13px]">{{ h.eyebrow }}</p>{% endif %}
-    <h1 id="hero-title" class="m-0 font-display text-[clamp(54px,11vw,138px)] leading-[.78] font-normal tracking-[-.075em]">
+  <div class="relative z-10 mx-auto flex {{ hero_h }} max-w-[1240px] flex-col {% if h.align == 'center' %}items-center text-center{% else %}items-start{% endif %} justify-center px-[8vw] pt-[120px] pb-[110px] max-md:px-[25px] max-md:pt-[125px] max-md:pb-[105px]">
+    {% if h.logo %}<img class="mb-8 h-auto w-[clamp(150px,14vw,200px)] max-md:mb-6" src="{{ '/assets/images/' | append: h.logo | relative_url }}" alt="{{ h.logo_alt | default: e.host.name | escape }}">{% endif %}
+    {% if h.eyebrow %}<p class="hero-shine mb-4 font-sans text-[18px] leading-[1.5] font-semibold tracking-[.2em] uppercase max-md:text-[13px]">{{ h.eyebrow }}</p>{% endif %}
+    <h1 id="hero-title" class="m-0 font-display text-[clamp(54px,6.5vw,92px)] leading-[.78] font-normal tracking-[-.075em]">
       {{ h.title_html | default: e.name }}
     </h1>
-    {% if h.subtitle_html %}<p class="mt-8 mb-[30px] font-display text-[clamp(16px,2vw,21px)] tracking-[.02em]">{{ h.subtitle_html }}</p>{% endif %}
+    {% if h.subtitle_html %}<p class="mt-8 mb-[30px] font-display text-[clamp(16px,1.4vw,19px)] tracking-[.02em]">{{ h.subtitle_html }}</p>{% endif %}
     {% if h.cta %}
-    <a class="btn-hero show-page inline-flex items-center gap-14 rounded-lg border px-9 py-7 text-[20px] font-bold tracking-[.15em] uppercase focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent max-md:gap-4 max-md:px-5 max-md:py-5 max-md:text-xs" href="#invitation" data-smooth-scroll hidden>{{ h.cta }} <span aria-hidden="true">↓</span></a>
+    <a class="btn-hero show-page inline-flex items-center gap-8 rounded-lg border px-7 py-4 text-sm font-bold tracking-[.15em] uppercase focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent max-md:gap-4 max-md:px-5 max-md:py-5 max-md:text-xs" href="#invitation" data-smooth-scroll hidden>{{ h.cta }} <span aria-hidden="true">↓</span></a>
     {% endif %}
   </div>
 </section>
